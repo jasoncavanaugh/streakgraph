@@ -139,9 +139,27 @@ const HabitSquaresDisplay = ({
   habit,
   year,
 }: IHabitSquaresDisplay) => {
+  const api_utils = api.useContext();
   const create_day_drop = api.habit.create_day_drop.useMutation();
   const delete_day_drop = api.habit.delete_day_drop.useMutation({
-    onSuccess() {},
+    async onMutate() {
+      // Cancel outgoing fetches (so they don't overwrite our optimistic update)
+      await api_utils.habit.get_all.cancel();
+
+      // Get the data from the queryCache
+      const prevData = api_utils.habit.get_all.getData();
+
+      // Optimistically update the data with our new post
+
+      // Return the previous data so we can revert if something goes wrong
+      return { prevData };
+    },
+    onError(err, data, ctx) {
+      api_utils.habit.get_all.setData(undefined, ctx?.prevData);
+    },
+    onSettled() {
+      api_utils.habit.invalidate();
+    },
   });
   // const [habit_drop_lookup, set_habit_drop_lookup] = useState({});
 

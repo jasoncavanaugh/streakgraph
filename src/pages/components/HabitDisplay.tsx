@@ -2,9 +2,8 @@ import { useMemo, useState } from "react";
 import { Modal } from "./Modal";
 import * as RadixModal from "@radix-ui/react-dialog";
 import { api } from "../../utils/api";
-import { Habit, HabitDayDrop } from "@prisma/client";
+import {  HabitDayDrop } from "@prisma/client";
 import { HabitWithDayDrops } from "../../server/api/routers/habitRouter";
-import { create } from "domain";
 
 interface DeleteHabitProps {
   id: string;

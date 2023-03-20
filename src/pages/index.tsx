@@ -92,8 +92,8 @@ const Home: NextPage = () => {
     return <div>Loading...</div>;
   }
 
-  const are_habits_present = !!all_habits.data;
-  console.log("all_habits.data", all_habits.data);
+  const are_habits_present = all_habits.status === "success";
+  // console.log("all_habits.data", all_habits.data);
   return (
     <div className="p-1 md:p-4">
       <input
@@ -124,7 +124,7 @@ const Home: NextPage = () => {
                 habit_name_lower.includes(filter_text_lower)
               );
             })
-            .map((habit, idx) => {
+            .map((habit) => {
               return <HabitDisplay habit={habit} year={2021} />;
             })}
       </ul>

@@ -182,11 +182,16 @@ const HabitSquaresDisplay = ({
           console.log("'old_habit_data' is undefined");
           return [];
         }
-        const new_habit_data = old_habit_data.filter((habit) => {
-          const are_same = habit.id === habit_id && habit.habit_day_drops.filter((day_drop) => day_drop.year === year && day_drop.month === month && day_drop.day === day).length > 0;
-          return !are_same;
-        });
-        return new_habit_data;
+        const filtered = old_habit_data.filter((habit) => habit.id === habit_id);
+        if (filtered.length === 0) {
+          throw new Error("'old_habit_data.filter((habit) => habit.id === habit_id)' is length zero");
+        }
+        if (filtered.length > 1) {
+          throw new Error("'old_habit_data.filter((habit) => habit.id === habit_id)' is length greater than one");
+        }
+        const habit_to_remove_drop_from = filtered[0]!;
+        habit_to_remove_drop_from.habit_day_drops = habit_to_remove_drop_from.habit_day_drops.filter((day_drop) =>  day_drop.year !== year || day_drop.month !== month || day_drop.day !== day);
+        return old_habit_data;
       });
 
       // Return the previous data so we can revert if something goes wrong

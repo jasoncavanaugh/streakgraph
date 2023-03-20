@@ -9,7 +9,7 @@ import { api } from "../utils/api";
 import { Modal } from "./components/Modal";
 import { HabitDisplay } from "./components/HabitDisplay";
 
-const input_classes = "border rounded border-slate-600 px-2 py-1";
+const input_classes = "rounded border border-slate-600 px-2 py-1";
 function AddNewHabitButton() {
   const [name, set_name] = useState("");
   const [color, set_color] = useState("");

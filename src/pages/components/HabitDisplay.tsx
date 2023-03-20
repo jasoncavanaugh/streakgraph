@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { Modal } from "./Modal";
 import * as RadixModal from "@radix-ui/react-dialog";
 import { api } from "../../utils/api";
-import {  HabitDayDrop } from "@prisma/client";
+import { HabitDayDrop } from "@prisma/client";
 import { HabitWithDayDrops } from "../../server/api/routers/habitRouter";
 
 interface DeleteHabitProps {
@@ -52,19 +52,6 @@ const DeleteHabit: React.FC<DeleteHabitProps> = ({ id }) => {
   );
 };
 
-function get_month_and_day_from_day_out_of_365(day_out_of_365: number) {
-  const days = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 31, 31];
-}
-// const calc = (day_num: number) => {
-//   let idx = 0;
-//   let cur_month = 1;
-//   while (idx < days.length && day_num > days[idx]!) {
-//     day_num -= days[idx]!;
-//     idx++;
-//     cur_month++;
-//   }
-//   return cur_month + " " + day_num;
-// };
 function get_first_day_of_year(year: number) {
   const january = 0;
   const first = 1;
@@ -84,7 +71,6 @@ function get_number_of_days_in_year(year: number) {
   return 366;
 }
 function get_number_of_total_squares_including_hidden(year: number) {
-  console.log("Running get_number_of_total_squares_including_hidden");
   return get_number_of_days_in_year(year) + get_first_day_of_year(year);
 }
 
@@ -160,8 +146,8 @@ const HabitSquaresDisplay = ({
       api_utils.habit.invalidate();
     },
   });
-  // const [habit_drop_lookup, set_habit_drop_lookup] = useState({});
 
+  //UI
   let output = [];
   for (let i = 0; i < first_day_of_year; i++) {
     output.push(<div className="h-[20px] w-[20px] opacity-0"></div>);
@@ -186,11 +172,10 @@ const HabitSquaresDisplay = ({
     }
     output.push(
       <div
-        className={`h-[20px] w-[20px] rounded-sm border border-pink-500 md:rounded md:border lg:h-[30px] lg:w-[30px] ${
-          i < first_day_of_year
+        className={`h-[20px] w-[20px] rounded-sm border border-pink-500 md:rounded md:border lg:h-[30px] lg:w-[30px] ${i < first_day_of_year
             ? "opacity-0"
             : "hover:cursor-pointer hover:brightness-110 "
-        } ${is_checked ? "bg-pink-500" : ""}`}
+          } ${is_checked ? "bg-pink-500" : ""}`}
         onClick={() => {
           if (is_checked) {
             delete_day_drop.mutate({
@@ -211,61 +196,10 @@ const HabitSquaresDisplay = ({
       ></div>
     );
   }
-  // for (let i = 0; i < number_of_total_squares_including_hidden; i++) {
-  //   output.push(
-  //     <div
-  //       onClick={() =>
-  //         i < first_day_of_year
-  //           ? () => {}
-  //           : on_habit_square_click(i - first_day_of_year + 1)
-  //       }
-  //       key={i}
-  //       className={`h-[20px] w-[20px] rounded-sm border border-pink-500 md:rounded md:border lg:h-[30px] lg:w-[30px] ${
-  //         i < first_day_of_year
-  //           ? "opacity-0"
-  //           : "hover:cursor-pointer hover:brightness-110 "
-  //       }
-  //       ${}
-  //       `}
-  //     ></div>
-  //   );
-  // }
   //I hate this
   return <>{output}</>;
 };
 
-/*
-const get_squares = ({
-  number_of_total_squares_including_hidden,
-  first_day_of_year,
-  on_habit_square_click,
-}: {
-  number_of_total_squares_including_hidden: number;
-  first_day_of_year: number;
-  on_habit_square_click: (idx: number) => void;
-}) => {
-  let output = [];
-  for (let i = 0; i < number_of_total_squares_including_hidden; i++) {
-    output.push(
-      <div
-        onClick={() =>
-          i < first_day_of_year
-            ? () => {}
-            : on_habit_square_click(i - first_day_of_year + 1)
-        }
-        key={i}
-        className={`h-[20px] w-[20px] rounded-sm border border-pink-500 md:rounded md:border lg:h-[30px] lg:w-[30px] ${
-          i < first_day_of_year
-            ? "opacity-0"
-            : "hover:cursor-pointer hover:brightness-110 "
-        }`}
-      >
-        {/* {calc(i + 1)} */ //}
-//       </div>
-//     );
-//   }
-//   return output;
-// };
 
 function get_month_and_day_from_day_in_year({
   day_out_of_number_of_days_in_year,
@@ -281,22 +215,7 @@ interface Props {
   habit: HabitWithDayDrops;
   year: number;
 }
-
 export const HabitDisplay: React.FC<Props> = (props) => {
-  // const [day, set_day] = useState("1 1");
-  // const number_of_days_in_year = get_number_of_days_in(year);
-
-  // const handle_click = (day_num: number) => {
-  //   let idx = 0;
-  //   let cur_month = 1;
-  //   while (idx < days.length && day_num > days[idx]!) {
-  //     day_num -= days[idx]!;
-  //     idx++;
-  //     cur_month++;
-  //   }
-  //   set_day(cur_month + " " + day_num);
-  //   // return cur_month + " " + day_num;
-  // };
   const [number_of_total_squares_including_hidden, first_day_of_year] = useMemo(
     () => [
       get_number_of_total_squares_including_hidden(props.year),
@@ -304,12 +223,7 @@ export const HabitDisplay: React.FC<Props> = (props) => {
     ],
     [props.year]
   );
-  // const first_day_of_year = useMemo(
-  //   () => get_first_day_of(props.year),
-  //   [props.year]
-  // );
 
-  // console.log(habit.habit_day_drops);
   return (
     <li
       key={props.habit.id}
@@ -321,35 +235,7 @@ export const HabitDisplay: React.FC<Props> = (props) => {
       <div className="h-2 md:h-4" />
       {/* <div className="grid grid-rows-6 gap-1 border border-green-500"> */}
       <div className="flex flex-col overflow-x-auto">
-        {/* <div className="flex py-2">
-          <h2 className="w-20">Jan</h2>
-          <h2 className="w-20">Feb</h2>
-          <h2 className="w-20">Mar</h2>
-          <h2 className="w-20">Apr</h2>
-          <h2 className="w-20">May</h2>
-          <h2 className="w-20">Jun</h2>
-          <h2 className="w-20">Jul</h2>
-          <h2 className="w-20">Aug</h2>
-          <h2 className="w-20">Sep</h2>
-          <h2 className="w-20">Oct</h2>
-          <h2 className="w-20">Nov</h2>
-          <h2 className="w-20">Dec</h2>
-        </div> */}
         <div className="jason gap-[0.15rem] md:gap-[0.2rem] lg:gap-[0.3rem]">
-          {/* {get_squares({
-            number_of_total_squares_including_hidden,
-            first_day_of_year,
-            on_habit_square_click: (day_out_of_365: number) => {
-              const [month, day] =
-                get_month_and_day_from_day_out_of_365(day_out_of_365);
-              add_habit_drop.mutate({
-                habit_id: props.habit.id,
-                year: props.year,
-                month: month,
-                day: day,
-              }});
-            }
-          )} */}
           <HabitSquaresDisplay
             number_of_total_squares_including_hidden={
               number_of_total_squares_including_hidden

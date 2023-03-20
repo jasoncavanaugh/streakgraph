@@ -5,12 +5,11 @@ import { api } from "../../utils/api";
 import { HabitDayDrop } from "@prisma/client";
 import { HabitWithDayDrops } from "../../server/api/routers/habitRouter";
 
-interface DeleteHabitProps {
+interface IDeleteHabitProps {
   id: string;
 }
-const DeleteHabit: React.FC<DeleteHabitProps> = ({ id }) => {
+const DeleteHabit: React.FC<IDeleteHabitProps> = ({ id }) => {
   const delete_habit = api.habit.delete.useMutation();
-
   return (
     <Modal
       trigger={
@@ -70,9 +69,6 @@ function get_number_of_days_in_year(year: number) {
   }
   return 366;
 }
-function get_number_of_total_squares_including_hidden(year: number) {
-  return get_number_of_days_in_year(year) + get_first_day_of_year(year);
-}
 
 function check_if_checked(
   day_out_of_year: number,
@@ -125,25 +121,84 @@ const HabitSquaresDisplay = ({
   year,
 }: IHabitSquaresDisplay) => {
   const api_utils = api.useContext();
-  const create_day_drop = api.habit.create_day_drop.useMutation();
-  const delete_day_drop = api.habit.delete_day_drop.useMutation({
-    async onMutate() {
+  const create_day_drop = api.habit.create_day_drop.useMutation({
+    async onMutate(variables) {
+      const { habit_id, year, month, day } = variables;
       // Cancel outgoing fetches (so they don't overwrite our optimistic update)
       await api_utils.habit.get_all.cancel();
 
       // Get the data from the queryCache
-      const prevData = api_utils.habit.get_all.getData();
-
+      const prev_data = api_utils.habit.get_all.getData();
+      if (!prev_data) {
+        console.log("'prev_data' is undefined");
+        return { prev_data: [] };
+      }
       // Optimistically update the data with our new post
+      api_utils.habit.get_all.setData(undefined, (old_habit_data) => {
+        if (!old_habit_data) {
+          console.log("'old_habit_data' is undefined");
+          return [];
+        }
+        const filtered = old_habit_data.filter((habit) => habit.id === habit_id);
+        if (filtered.length === 0) {
+          throw new Error("'old_habit_data.filter((habit) => habit.id === habit_id)' is length zero");
+        }
+        if (filtered.length > 1) {
+          throw new Error("'old_habit_data.filter((habit) => habit.id === habit_id)' is length greater than one");
+        }
+        const habit_to_add_drop_to = filtered[0]!;
+        habit_to_add_drop_to.habit_day_drops.push({ id: "", habit_id: habit_id, year: year, month: month, day: day });
+        return old_habit_data;
+      });
 
       // Return the previous data so we can revert if something goes wrong
-      return { prevData };
+      return { prev_data };
     },
     onError(err, data, ctx) {
-      api_utils.habit.get_all.setData(undefined, ctx?.prevData);
+      console.error(err);
+      api_utils.habit.get_all.setData(undefined, ctx?.prev_data);
     },
     onSettled() {
-      api_utils.habit.invalidate();
+      api_utils.habit.get_all.invalidate();
+    },
+
+  });
+
+  const delete_day_drop = api.habit.delete_day_drop.useMutation({
+    async onMutate(variables) {
+      const { habit_id, year, month, day } = variables;
+      // Cancel outgoing fetches (so they don't overwrite our optimistic update)
+      await api_utils.habit.get_all.cancel();
+
+      // Get the data from the queryCache
+      const prev_data = api_utils.habit.get_all.getData();
+      if (!prev_data) {
+        console.log("'prev_data' is undefined");
+        return;
+      }
+      // Optimistically update the data with our new post
+      api_utils.habit.get_all.setData(undefined, (old_habit_data) => {
+        if (!old_habit_data) {
+          console.log("'old_habit_data' is undefined");
+          return [];
+        }
+        const new_habit_data = old_habit_data.filter((habit) => {
+          const are_same = habit.id === habit_id && habit.habit_day_drops.filter((day_drop) => day_drop.year === year && day_drop.month === month && day_drop.day === day).length > 0;
+          return !are_same;
+        });
+        return new_habit_data;
+      });
+
+      // Return the previous data so we can revert if something goes wrong
+      return { prev_data };
+    },
+    onError(err, data, ctx) {
+      console.error(err);
+      api_utils.habit.get_all.setData(undefined, ctx?.prev_data);
+    },
+    onSettled() {
+      // api_utils.habit.invalidate();
+      api_utils.habit.get_all.invalidate();
     },
   });
 
@@ -173,8 +228,8 @@ const HabitSquaresDisplay = ({
     output.push(
       <div
         className={`h-[20px] w-[20px] rounded-sm border border-pink-500 md:rounded md:border lg:h-[30px] lg:w-[30px] ${i < first_day_of_year
-            ? "opacity-0"
-            : "hover:cursor-pointer hover:brightness-110 "
+          ? "opacity-0"
+          : "hover:cursor-pointer hover:brightness-110 "
           } ${is_checked ? "bg-pink-500" : ""}`}
         onClick={() => {
           if (is_checked) {
@@ -217,10 +272,13 @@ interface Props {
 }
 export const HabitDisplay: React.FC<Props> = (props) => {
   const [number_of_total_squares_including_hidden, first_day_of_year] = useMemo(
-    () => [
-      get_number_of_total_squares_including_hidden(props.year),
-      get_first_day_of_year(props.year),
-    ],
+    () => {
+      const number_of_total_squares_including_hidden = get_number_of_days_in_year(props.year) + get_first_day_of_year(props.year);
+      return [
+        number_of_total_squares_including_hidden,
+        get_first_day_of_year(props.year),
+      ]
+    },
     [props.year]
   );
 
@@ -233,7 +291,6 @@ export const HabitDisplay: React.FC<Props> = (props) => {
         {props.habit.name}
       </h1>
       <div className="h-2 md:h-4" />
-      {/* <div className="grid grid-rows-6 gap-1 border border-green-500"> */}
       <div className="flex flex-col overflow-x-auto">
         <div className="jason gap-[0.15rem] md:gap-[0.2rem] lg:gap-[0.3rem]">
           <HabitSquaresDisplay

@@ -7,3 +7,4 @@ export function Spinner({ className = "" }: ISpinnerProps) {
     <div className={`animate-spin rounded-full border-t-transparent ${className}`}/>
   );
 }
+export default Spinner;

@@ -42,3 +42,4 @@ export const Modal = ({ trigger, content, open, on_open_change, modal_frame_clas
     </RadixModal.Root>
   );
 };
+export default Modal;

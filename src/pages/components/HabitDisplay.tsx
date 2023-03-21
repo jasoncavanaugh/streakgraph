@@ -381,3 +381,5 @@ export const HabitDisplay = (props: IHabitDisplayProps) => {
     </li>
   );
 };
+
+export default HabitDisplay;

@@ -5,6 +5,7 @@ import { api } from "../../utils/api";
 import { HabitDayDrop } from "@prisma/client";
 import { HabitWithDayDrops } from "../../server/api/routers/habitRouter";
 import * as Tooltip from '@radix-ui/react-tooltip';
+import { Spinner } from "./Spinner";
 // import { PlusIcon } from '@radix-ui/react-icons';
 // import './styles.css';
 interface IHabitDayDropTooltipProps {
@@ -24,6 +25,7 @@ const HabitDayDropTooltip = ({ is_checked, on_click, content }: IHabitDayDropToo
         </Tooltip.Trigger>
         <Tooltip.Portal>
           <Tooltip.Content
+            //Taken from https://ui.shadcn.com/docs/primitives/tooltip
             className="animate-in fade-in-50 data-[side=bottom]:slide-in-from-top-1 data-[side=top]:slide-in-from-bottom-1 data-[side=left]:slide-in-from-right-1 data-[side=right]:slide-in-from-left-1 z-50 overflow-hidden rounded-md border border-slate-100 bg-white p-3 text-sm text-slate-700 shadow-md dark:border-slate-800 dark:bg-slate-800 dark:text-slate-400"
           >
             {content}
@@ -35,67 +37,70 @@ const HabitDayDropTooltip = ({ is_checked, on_click, content }: IHabitDayDropToo
   );
 };
 
-
-// export default TooltipDemo;
-
-
 interface IDeleteHabitProps {
   id: string;
 }
 const DeleteHabit = ({ id }: IDeleteHabitProps) => {
   const [loading, set_loading] = useState(false);
+  const [is_modal_open, set_is_modal_open] = useState(false);
 
   const api_utils = api.useContext();
   const delete_habit = api.habit.delete.useMutation({
     onSuccess: () => {
-      set_loading(false);
       api_utils.habit.get_all.invalidate();
+      // set_loading(false);
+      set_is_modal_open(false);//TODO: Have to figure out how to close the modal once the new data comes in
     },
     onError: (err, data, ctx) => {
       alert("error");
     },
   });
+
   return (
     <Modal
-      top_border="red-500"
+      open={is_modal_open}
       trigger={
         <button
           type="button"
-          className="rounded-full bg-red-500 py-1 px-2 text-sm font-semibold text-white outline-none hover:brightness-110 md:py-2 md:px-4 md:text-base lg:text-base"
+          className="rounded-full bg-red-500 py-2 px-4 text-sm font-semibold text-white outline-none hover:brightness-110 md:py-2 md:px-4 md:text-base lg:text-base"
+          onClick={() => set_is_modal_open(true)}
         >
           Remove
         </button>
       }
+      modal_frame_classNames="top-1/2 left-1/2 w-[20rem] lg:w-[30rem] flex -translate-x-1/2 -translate-y-1/2 flex-col border-t-8 border-t-red-500 px-5 py-3 lg:top-1/2 lg:px-8 lg:py-6"
       content={
-        <div>
-          <RadixModal.Title className="text-3xl font-bold text-slate-700">
-            Delete habit
+        <form onSubmit={(e) => {
+          e.preventDefault();
+
+          delete_habit.mutate({ id });
+        }}>
+          <RadixModal.Title className="text-3xl font-bold text-slate-700 whitespace-nowrap">
+            Delete Habit
           </RadixModal.Title>
           <div className="h-1 lg:h-4" />
           <div className="flex w-full flex-col gap-4">
             Are you sure you wish to delete this habit?
           </div>
           <div className="h-8" />
-          <div className="flex justify-center gap-5 border">
-            <RadixModal.Close
-              className="rounded-full bg-slate-500 px-3 py-2 text-xs font-semibold text-white outline-none hover:brightness-110 lg:px-5 lg:py-3 lg:text-base lg:font-bold"
+          <div className="flex justify-center gap-5">
+            <button
+              className="rounded-full bg-slate-500 px-5 py-3 text-xs font-semibold text-white outline-none hover:brightness-110 lg:text-base lg:font-bold"
               type="button"
+              onClick={() => set_is_modal_open(false)}
             >
               Cancel
-            </RadixModal.Close>
+            </button>
+
             <button
-              className="rounded-full bg-red-500 px-3 py-2 text-xs font-semibold text-white outline-none hover:brightness-110 lg:px-5 lg:py-3 lg:text-base lg:font-bold"
-              type="button"
-              onClick={() => {
-                set_loading(true);
-                delete_habit.mutate({ id });
-              }}
+              className="rounded-full bg-red-500 px-5 py-3 text-xs font-semibold text-white outline-none hover:brightness-110 lg:text-base lg:font-bold"
+              type="submit"
             >
-              {loading && (<div className="border-t-transparent mx-[1.33rem] my-1 border-solid animate-spin rounded-full border-white border-2 h-4 w-4"/>)}
-              {!loading && "Delete"}
+              {delete_habit.status === "loading" && (<Spinner className="h-4 w-4 border-2 border-solid border-white lg:mx-[1.33rem] lg:my-1" />)}
+              {delete_habit.status !== "loading" && "Delete"}
             </button>
           </div>
-        </div>
+        </form>
       }
     />
   );
@@ -352,7 +357,7 @@ export const HabitDisplay = (props: IHabitDisplayProps) => {
   return (
     <li
       key={props.habit.id}
-      className="rounded-lg border bg-white py-1 px-2 md:p-4"
+      className="rounded-lg border bg-white p-2 md:p-4"
     >
       <h1 className="flex justify-start text-xl font-semibold text-slate-700 md:text-2xl lg:text-3xl">
         {props.habit.name}

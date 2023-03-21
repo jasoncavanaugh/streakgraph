@@ -41,7 +41,7 @@ export const habit_router = createTRPCRouter({
       z.object({
         habit_id: z.string(),
         year: z.number().gte(1),
-        month: z.number().gte(0).lte(11),
+        month: z.number().gte(1).lte(12),
         day: z.number().gte(1).lte(31),
       })
     )
@@ -55,7 +55,7 @@ export const habit_router = createTRPCRouter({
       z.object({
         habit_id: z.string(),
         year: z.number().gte(1),
-        month: z.number().gte(0).lte(11),
+        month: z.number().gte(1).lte(12),
         day: z.number().gte(1).lte(31),
       })
     )

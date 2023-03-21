@@ -4,14 +4,60 @@ import * as RadixModal from "@radix-ui/react-dialog";
 import { api } from "../../utils/api";
 import { HabitDayDrop } from "@prisma/client";
 import { HabitWithDayDrops } from "../../server/api/routers/habitRouter";
+import * as Tooltip from '@radix-ui/react-tooltip';
+// import { PlusIcon } from '@radix-ui/react-icons';
+// import './styles.css';
+interface IHabitDayDropTooltipProps {
+  is_checked: boolean;
+  on_click: () => void;
+  content: string;
+}
+const HabitDayDropTooltip = ({ is_checked, on_click, content }: IHabitDayDropTooltipProps) => {
+  return (
+    <Tooltip.Provider delayDuration={100} skipDelayDuration={0}>
+      <Tooltip.Root>
+        <Tooltip.Trigger asChild>
+          <div
+            className={`h-[20px] w-[20px] rounded-sm border border-pink-500 md:rounded md:border lg:h-[30px] lg:w-[30px] hover:cursor-pointer hover:brightness-110 ${is_checked ? "bg-pink-500" : ""}`}
+            onClick={on_click}
+          />
+        </Tooltip.Trigger>
+        <Tooltip.Portal>
+          <Tooltip.Content
+            className="animate-in fade-in-50 data-[side=bottom]:slide-in-from-top-1 data-[side=top]:slide-in-from-bottom-1 data-[side=left]:slide-in-from-right-1 data-[side=right]:slide-in-from-left-1 z-50 overflow-hidden rounded-md border border-slate-100 bg-white p-3 text-sm text-slate-700 shadow-md dark:border-slate-800 dark:bg-slate-800 dark:text-slate-400"
+          >
+            {content}
+            <Tooltip.Arrow className="fill-white" />
+          </Tooltip.Content>
+        </Tooltip.Portal>
+      </Tooltip.Root>
+    </Tooltip.Provider>
+  );
+};
+
+
+// export default TooltipDemo;
+
 
 interface IDeleteHabitProps {
   id: string;
 }
-const DeleteHabit: React.FC<IDeleteHabitProps> = ({ id }) => {
-  const delete_habit = api.habit.delete.useMutation();
+const DeleteHabit = ({ id }: IDeleteHabitProps) => {
+  const [loading, set_loading] = useState(false);
+
+  const api_utils = api.useContext();
+  const delete_habit = api.habit.delete.useMutation({
+    onSuccess: () => {
+      set_loading(false);
+      api_utils.habit.get_all.invalidate();
+    },
+    onError: (err, data, ctx) => {
+      alert("error");
+    },
+  });
   return (
     <Modal
+      top_border="red-500"
       trigger={
         <button
           type="button"
@@ -30,7 +76,7 @@ const DeleteHabit: React.FC<IDeleteHabitProps> = ({ id }) => {
             Are you sure you wish to delete this habit?
           </div>
           <div className="h-8" />
-          <div className="flex justify-center gap-5">
+          <div className="flex justify-center gap-5 border">
             <RadixModal.Close
               className="rounded-full bg-slate-500 px-3 py-2 text-xs font-semibold text-white outline-none hover:brightness-110 lg:px-5 lg:py-3 lg:text-base lg:font-bold"
               type="button"
@@ -40,9 +86,13 @@ const DeleteHabit: React.FC<IDeleteHabitProps> = ({ id }) => {
             <button
               className="rounded-full bg-red-500 px-3 py-2 text-xs font-semibold text-white outline-none hover:brightness-110 lg:px-5 lg:py-3 lg:text-base lg:font-bold"
               type="button"
-              onClick={() => delete_habit.mutate({ id })}
+              onClick={() => {
+                set_loading(true);
+                delete_habit.mutate({ id });
+              }}
             >
-              Delete
+              {loading && (<div className="border-t-transparent mx-[1.33rem] my-1 border-solid animate-spin rounded-full border-white border-2 h-4 w-4"/>)}
+              {!loading && "Delete"}
             </button>
           </div>
         </div>
@@ -51,10 +101,19 @@ const DeleteHabit: React.FC<IDeleteHabitProps> = ({ id }) => {
   );
 };
 
-function get_first_day_of_year(year: number) {
-  const january = 0;
-  const first = 1;
-  return new Date(year, january, first).getDay();
+{/*
+
+<div className="absolute right-1/2 bottom-1/2  transform translate-x-1/2 translate-y-1/2 ">
+  <div className="flex items-center justify-center space-x-2">
+  <div className="w-1 h-1 rounded-full animate-pulse bg-white"></div>
+  <div className="w-1 h-1 rounded-full animate-pulse bg-white"></div>
+  <div className="w-1 h-1 rounded-full animate-pulse bg-white"></div>
+  </div>
+*/}
+
+const day_names = ["Sun", "Mon", "Tues", "Wed", "Thur", "Fri", "Sat"];
+function get_day_name(year: number, month_idx: number, day: number) {
+  return day_names[new Date(year, month_idx, day).getDay()]!
 }
 
 function get_number_of_days_in_year(year: number) {
@@ -91,7 +150,7 @@ function check_if_checked(
   );
 }
 
-function get_day_month(
+function get_day_and_month(
   day_out_of_year: number,
   drops: HabitDayDrop[],
   year: number
@@ -122,7 +181,7 @@ const HabitSquaresDisplay = ({
 }: IHabitSquaresDisplay) => {
   const api_utils = api.useContext();
   const create_day_drop = api.habit.create_day_drop.useMutation({
-    async onMutate(variables) {
+    onMutate: async (variables) => {
       const { habit_id, year, month, day } = variables;
       // Cancel outgoing fetches (so they don't overwrite our optimistic update)
       await api_utils.habit.get_all.cancel();
@@ -138,8 +197,7 @@ const HabitSquaresDisplay = ({
         if (!old_habit_data) {
           console.log("'old_habit_data' is undefined");
           return [];
-        }
-        const filtered = old_habit_data.filter((habit) => habit.id === habit_id);
+        } const filtered = old_habit_data.filter((habit) => habit.id === habit_id);
         if (filtered.length === 0) {
           throw new Error("'old_habit_data.filter((habit) => habit.id === habit_id)' is length zero");
         }
@@ -154,14 +212,13 @@ const HabitSquaresDisplay = ({
       // Return the previous data so we can revert if something goes wrong
       return { prev_data };
     },
-    onError(err, data, ctx) {
+    onError: (err, data, ctx) => {
       console.error(err);
       api_utils.habit.get_all.setData(undefined, ctx?.prev_data);
     },
-    onSettled() {
+    onSettled: () => {
       api_utils.habit.get_all.invalidate();
     },
-
   });
 
   const delete_day_drop = api.habit.delete_day_drop.useMutation({
@@ -190,7 +247,7 @@ const HabitSquaresDisplay = ({
           throw new Error("'old_habit_data.filter((habit) => habit.id === habit_id)' is length greater than one");
         }
         const habit_to_remove_drop_from = filtered[0]!;
-        habit_to_remove_drop_from.habit_day_drops = habit_to_remove_drop_from.habit_day_drops.filter((day_drop) =>  day_drop.year !== year || day_drop.month !== month || day_drop.day !== day);
+        habit_to_remove_drop_from.habit_day_drops = habit_to_remove_drop_from.habit_day_drops.filter((day_drop) => day_drop.year !== year || day_drop.month !== month || day_drop.day !== day);
         return old_habit_data;
       });
 
@@ -209,12 +266,12 @@ const HabitSquaresDisplay = ({
 
   //UI
   let output = [];
-  for (let i = 0; i < first_day_of_year; i++) {
+  for (let i = 1; i < first_day_of_year; i++) {
     output.push(<div className="h-[20px] w-[20px] opacity-0"></div>);
   }
   for (
     let i = first_day_of_year;
-    i < number_of_total_squares_including_hidden;
+    i <= number_of_total_squares_including_hidden;
     i++
   ) {
     const is_checked = check_if_checked(
@@ -222,21 +279,17 @@ const HabitSquaresDisplay = ({
       habit.habit_day_drops,
       year
     );
-    const [month, day] = get_day_month(
+    const [month, day] = get_day_and_month(
       i - first_day_of_year + 1,
       habit.habit_day_drops,
       year
     );
-    if (!month || !day) {
-      throw new Error("Eff my life");
-    }
+    if (!month || !day) { throw new Error("Eff my life"); }
+
+    const day_name = get_day_name(year, month - 1, day);
     output.push(
-      <div
-        className={`h-[20px] w-[20px] rounded-sm border border-pink-500 md:rounded md:border lg:h-[30px] lg:w-[30px] ${i < first_day_of_year
-          ? "opacity-0"
-          : "hover:cursor-pointer hover:brightness-110 "
-          } ${is_checked ? "bg-pink-500" : ""}`}
-        onClick={() => {
+      <HabitDayDropTooltip is_checked={is_checked} on_click={
+        () => {
           if (is_checked) {
             delete_day_drop.mutate({
               habit_id: habit.id,
@@ -252,8 +305,10 @@ const HabitSquaresDisplay = ({
               day: day,
             });
           }
-        }}
-      ></div>
+        }
+      }
+        content={`${day_name} ${year}-${month}-${day}`}
+      />
     );
   }
   //I hate this
@@ -271,17 +326,24 @@ function get_month_and_day_from_day_in_year({
   return [0, 0];
 }
 
-interface Props {
+function get_first_day_of_year(year: number) {
+  const january = 0;
+  const first = 1;
+  return new Date(year, january, first).getDay() + 1;
+}
+
+interface IHabitDisplayProps {
   habit: HabitWithDayDrops;
   year: number;
 }
-export const HabitDisplay: React.FC<Props> = (props) => {
+export const HabitDisplay = (props: IHabitDisplayProps) => {
   const [number_of_total_squares_including_hidden, first_day_of_year] = useMemo(
     () => {
-      const number_of_total_squares_including_hidden = get_number_of_days_in_year(props.year) + get_first_day_of_year(props.year);
+      const first_day_of_year = get_first_day_of_year(props.year);
+      const number_of_total_squares_including_hidden = get_number_of_days_in_year(props.year) + first_day_of_year - 1;
       return [
         number_of_total_squares_including_hidden,
-        get_first_day_of_year(props.year),
+        first_day_of_year
       ]
     },
     [props.year]

@@ -67,11 +67,10 @@ function AddNewHabitButton() {
               Cancel
             </RadixModal.Close>
             <button
-              className={`rounded-full bg-pink-500 px-3 py-2 text-xs font-semibold text-white lg:px-5 lg:py-3 lg:text-base lg:font-bold ${
-                add_habit_disabled
+              className={`rounded-full bg-pink-500 px-3 py-2 text-xs font-semibold text-white lg:px-5 lg:py-3 lg:text-base lg:font-bold ${add_habit_disabled
                   ? "opacity-50"
                   : "hover:cursor-pointer hover:brightness-110"
-              }`}
+                }`}
               onClick={handle_create_habit_click}
               disabled={add_habit_disabled}
               type="button"
@@ -91,9 +90,10 @@ const Home: NextPage = () => {
   if (all_habits.status === "loading") {
     return <div>Loading...</div>;
   }
+  if (all_habits.status === "error") {
+    console.error(all_habits.error);
+  }
 
-  const are_habits_present = all_habits.status === "success";
-  // console.log("all_habits.data", all_habits.data);
   return (
     <div className="p-1 md:p-4">
       <input
@@ -106,14 +106,21 @@ const Home: NextPage = () => {
       ></input>
       <div className="h-2 md:h-4" />
       <ul className="flex flex-col gap-4 rounded-lg bg-slate-500 p-2 md:p-4">
-        {!are_habits_present && (
+        {all_habits.status === "error" && (
+          <div className="flex h-[95vh] items-center justify-center">
+            <h1 className="text-white">
+              Uh oh, there was a problem loading your habits.
+            </h1>
+          </div>
+        )}
+        {all_habits.status === "success" && all_habits.data.length === 0 && (
           <div className="flex h-[95vh] items-center justify-center">
             <h1 className="text-white">
               Click the '+' button to add a new habit.
             </h1>
           </div>
-        )}
-        {are_habits_present &&
+          )}
+        {all_habits.status === "success" && all_habits.data.length > 0 && (
           all_habits.data
             .filter((habit) => {
               const filter_text_lower = filter_text.toLowerCase();
@@ -125,8 +132,8 @@ const Home: NextPage = () => {
               );
             })
             .map((habit) => {
-              return <HabitDisplay habit={habit} year={2021} />;
-            })}
+              return <HabitDisplay habit={habit} year={2023} />;
+            }))}
       </ul>
       <AddNewHabitButton />
     </div>

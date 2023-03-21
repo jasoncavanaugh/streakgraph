@@ -25,7 +25,7 @@ model Habit {
 model HabitDayDrop {
   id       String @id @default(cuid())
   habit_id String
-  habit    Habit  @relation(fields: [habit_id], references: [id])
+  habit    Habit  @relation(fields: [habit_id], references: [id], onDelete: Cascade)
   year     Int
   month    Int
   day      Int

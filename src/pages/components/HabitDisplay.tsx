@@ -1,10 +1,10 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Modal } from "./Modal";
 import * as RadixModal from "@radix-ui/react-dialog";
 import { api } from "../../utils/api";
 import { HabitDayDrop } from "@prisma/client";
 import { HabitWithDayDrops } from "../../server/api/routers/habitRouter";
-import * as Tooltip from '@radix-ui/react-tooltip';
+import * as Tooltip from "@radix-ui/react-tooltip";
 import { Spinner } from "./Spinner";
 // import { PlusIcon } from '@radix-ui/react-icons';
 // import './styles.css';
@@ -13,13 +13,19 @@ interface IHabitDayDropTooltipProps {
   on_click: () => void;
   content: string;
 }
-const HabitDayDropTooltip = ({ is_checked, on_click, content }: IHabitDayDropTooltipProps) => {
+const HabitDayDropTooltip = ({
+  is_checked,
+  on_click,
+  content,
+}: IHabitDayDropTooltipProps) => {
   return (
     <Tooltip.Provider delayDuration={100} skipDelayDuration={0}>
       <Tooltip.Root>
         <Tooltip.Trigger asChild>
           <div
-            className={`h-[20px] w-[20px] rounded-sm border border-pink-500 md:rounded md:border lg:h-[30px] lg:w-[30px] hover:cursor-pointer hover:brightness-110 ${is_checked ? "bg-pink-500" : ""}`}
+            className={`h-[20px] w-[20px] rounded-sm border border-pink-500 hover:cursor-pointer hover:brightness-110 md:rounded md:border lg:h-[30px] lg:w-[30px] ${
+              is_checked ? "bg-pink-500" : ""
+            }`}
             onClick={on_click}
           />
         </Tooltip.Trigger>
@@ -49,7 +55,7 @@ const DeleteHabit = ({ id }: IDeleteHabitProps) => {
     onSuccess: () => {
       api_utils.habit.get_all.invalidate();
       // set_loading(false);
-      set_is_modal_open(false);//TODO: Have to figure out how to close the modal once the new data comes in
+      set_is_modal_open(false); //TODO: Have to figure out how to close the modal once the new data comes in
     },
     onError: (err, data, ctx) => {
       alert("error");
@@ -70,12 +76,13 @@ const DeleteHabit = ({ id }: IDeleteHabitProps) => {
       }
       modal_frame_classNames="top-1/2 left-1/2 w-[20rem] lg:w-[30rem] flex -translate-x-1/2 -translate-y-1/2 flex-col border-t-8 border-t-red-500 px-5 py-3 lg:top-1/2 lg:px-8 lg:py-6"
       content={
-        <form onSubmit={(e) => {
-          e.preventDefault();
-
-          delete_habit.mutate({ id });
-        }}>
-          <RadixModal.Title className="text-3xl font-bold text-slate-700 whitespace-nowrap">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            delete_habit.mutate({ id });
+          }}
+        >
+          <RadixModal.Title className="whitespace-nowrap text-3xl font-bold text-slate-700">
             Delete Habit
           </RadixModal.Title>
           <div className="h-1 lg:h-4" />
@@ -96,7 +103,9 @@ const DeleteHabit = ({ id }: IDeleteHabitProps) => {
               className="rounded-full bg-red-500 px-5 py-3 text-xs font-semibold text-white outline-none hover:brightness-110 lg:text-base lg:font-bold"
               type="submit"
             >
-              {delete_habit.status === "loading" && (<Spinner className="h-4 w-4 border-2 border-solid border-white lg:mx-[1.33rem] lg:my-1" />)}
+              {delete_habit.status === "loading" && (
+                <Spinner className="h-4 w-4 border-2 border-solid border-white lg:mx-[1.33rem] lg:my-1" />
+              )}
               {delete_habit.status !== "loading" && "Delete"}
             </button>
           </div>
@@ -106,7 +115,8 @@ const DeleteHabit = ({ id }: IDeleteHabitProps) => {
   );
 };
 
-{/*
+{
+  /*
 
 <div className="absolute right-1/2 bottom-1/2  transform translate-x-1/2 translate-y-1/2 ">
   <div className="flex items-center justify-center space-x-2">
@@ -114,11 +124,12 @@ const DeleteHabit = ({ id }: IDeleteHabitProps) => {
   <div className="w-1 h-1 rounded-full animate-pulse bg-white"></div>
   <div className="w-1 h-1 rounded-full animate-pulse bg-white"></div>
   </div>
-*/}
+*/
+}
 
 const day_names = ["Sun", "Mon", "Tues", "Wed", "Thur", "Fri", "Sat"];
 function get_day_name(year: number, month_idx: number, day: number) {
-  return day_names[new Date(year, month_idx, day).getDay()]!
+  return day_names[new Date(year, month_idx, day).getDay()]!;
 }
 
 function get_number_of_days_in_year(year: number) {
@@ -202,15 +213,28 @@ const HabitSquaresDisplay = ({
         if (!old_habit_data) {
           console.log("'old_habit_data' is undefined");
           return [];
-        } const filtered = old_habit_data.filter((habit) => habit.id === habit_id);
+        }
+        const filtered = old_habit_data.filter(
+          (habit) => habit.id === habit_id
+        );
         if (filtered.length === 0) {
-          throw new Error("'old_habit_data.filter((habit) => habit.id === habit_id)' is length zero");
+          throw new Error(
+            "'old_habit_data.filter((habit) => habit.id === habit_id)' is length zero"
+          );
         }
         if (filtered.length > 1) {
-          throw new Error("'old_habit_data.filter((habit) => habit.id === habit_id)' is length greater than one");
+          throw new Error(
+            "'old_habit_data.filter((habit) => habit.id === habit_id)' is length greater than one"
+          );
         }
         const habit_to_add_drop_to = filtered[0]!;
-        habit_to_add_drop_to.habit_day_drops.push({ id: "", habit_id: habit_id, year: year, month: month, day: day });
+        habit_to_add_drop_to.habit_day_drops.push({
+          id: "",
+          habit_id: habit_id,
+          year: year,
+          month: month,
+          day: day,
+        });
         return old_habit_data;
       });
 
@@ -244,15 +268,27 @@ const HabitSquaresDisplay = ({
           console.log("'old_habit_data' is undefined");
           return [];
         }
-        const filtered = old_habit_data.filter((habit) => habit.id === habit_id);
+        const filtered = old_habit_data.filter(
+          (habit) => habit.id === habit_id
+        );
         if (filtered.length === 0) {
-          throw new Error("'old_habit_data.filter((habit) => habit.id === habit_id)' is length zero");
+          throw new Error(
+            "'old_habit_data.filter((habit) => habit.id === habit_id)' is length zero"
+          );
         }
         if (filtered.length > 1) {
-          throw new Error("'old_habit_data.filter((habit) => habit.id === habit_id)' is length greater than one");
+          throw new Error(
+            "'old_habit_data.filter((habit) => habit.id === habit_id)' is length greater than one"
+          );
         }
         const habit_to_remove_drop_from = filtered[0]!;
-        habit_to_remove_drop_from.habit_day_drops = habit_to_remove_drop_from.habit_day_drops.filter((day_drop) => day_drop.year !== year || day_drop.month !== month || day_drop.day !== day);
+        habit_to_remove_drop_from.habit_day_drops =
+          habit_to_remove_drop_from.habit_day_drops.filter(
+            (day_drop) =>
+              day_drop.year !== year ||
+              day_drop.month !== month ||
+              day_drop.day !== day
+          );
         return old_habit_data;
       });
 
@@ -289,12 +325,15 @@ const HabitSquaresDisplay = ({
       habit.habit_day_drops,
       year
     );
-    if (!month || !day) { throw new Error("Eff my life"); }
+    if (!month || !day) {
+      throw new Error("Eff my life");
+    }
 
     const day_name = get_day_name(year, month - 1, day);
     output.push(
-      <HabitDayDropTooltip is_checked={is_checked} on_click={
-        () => {
+      <HabitDayDropTooltip
+        is_checked={is_checked}
+        on_click={() => {
           if (is_checked) {
             delete_day_drop.mutate({
               habit_id: habit.id,
@@ -310,8 +349,7 @@ const HabitSquaresDisplay = ({
               day: day,
             });
           }
-        }
-      }
+        }}
         content={`${day_name} ${year}-${month}-${day}`}
       />
     );
@@ -319,17 +357,6 @@ const HabitSquaresDisplay = ({
   //I hate this
   return <>{output}</>;
 };
-
-
-function get_month_and_day_from_day_in_year({
-  day_out_of_number_of_days_in_year,
-  year,
-}: {
-  day_out_of_number_of_days_in_year: number;
-  year: number;
-}) {
-  return [0, 0];
-}
 
 function get_first_day_of_year(year: number) {
   const january = 0;
@@ -342,23 +369,23 @@ interface IHabitDisplayProps {
   year: number;
 }
 export const HabitDisplay = (props: IHabitDisplayProps) => {
-  const [number_of_total_squares_including_hidden, first_day_of_year] = useMemo(
-    () => {
-      const first_day_of_year = get_first_day_of_year(props.year);
-      const number_of_total_squares_including_hidden = get_number_of_days_in_year(props.year) + first_day_of_year - 1;
-      return [
-        number_of_total_squares_including_hidden,
-        first_day_of_year
-      ]
-    },
-    [props.year]
-  );
+  // const [number_of_total_squares_including_hidden, first_day_of_year] = useMemo(
+  //   () => {
+  //     console.log("In useMemo");
+  //     const first_day_of_year = get_first_day_of_year(props.year);
+  //     const number_of_total_squares_including_hidden = get_number_of_days_in_year(props.year) + first_day_of_year - 1;
+  //     return [
+  //       number_of_total_squares_including_hidden,
+  //       first_day_of_year
+  //     ]
+  //   },
+  //   []
+  // );
+  const number_of_total_squares_including_hidden = 365;
+  const first_day_of_year = 5;
 
   return (
-    <li
-      key={props.habit.id}
-      className="rounded-lg border bg-white p-2 md:p-4"
-    >
+    <li key={props.habit.id} className="rounded-lg border bg-white p-2 md:p-4">
       <h1 className="flex justify-start text-xl font-semibold text-slate-700 md:text-2xl lg:text-3xl">
         {props.habit.name}
       </h1>

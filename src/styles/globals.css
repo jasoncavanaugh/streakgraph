@@ -3,7 +3,6 @@
 @tailwind utilities;
 
 body {
-  /* @apply h-screen border border-red-500; */
   @apply bg-gray-800;
 }
 ::-webkit-scrollbar {

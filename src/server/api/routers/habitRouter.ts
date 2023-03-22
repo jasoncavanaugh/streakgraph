@@ -3,7 +3,7 @@ import { z } from "zod";
 import { Prisma } from "@prisma/client";
 import { createTRPCRouter, publicProcedure, protectedProcedure } from "../trpc";
 
-//Types. I kinda hate this. It's too magical. Wtf are these generated types
+//WTF is this
 const habit_with_habit_day_drops = Prisma.validator<Prisma.HabitArgs>()({
   include: { habit_day_drops: true },
 });

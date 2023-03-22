@@ -3,7 +3,7 @@ import * as RadixModal from "@radix-ui/react-dialog";
 import Head from "next/head";
 import Link from "next/link";
 import { signIn, signOut, useSession } from "next-auth/react";
-import { FormEvent, useRef, useState } from "react";
+import { useState } from "react";
 
 import { api } from "../utils/api";
 import { Modal } from "./components/Modal";
@@ -18,16 +18,17 @@ function AddNewHabitButton() {
 
   const api_utils = api.useContext();
   const create_habit = api.habit.create.useMutation({
-    onMutate: () => {
-
-    },
+    onMutate: () => {},
     onSuccess: () => {
       api_utils.habit.get_all.invalidate();
       set_is_modal_open(false);
-    }
+    },
   });
 
-  const add_habit_disabled = name.length === 0 || color.length === 0 || create_habit.status === "loading";
+  const add_habit_disabled =
+    name.length === 0 ||
+    color.length === 0 ||
+    create_habit.status === "loading";
   return (
     <Modal
       open={is_modal_open}
@@ -40,17 +41,18 @@ function AddNewHabitButton() {
           +
         </button>
       }
-      modal_frame_classNames="top-1/2 left-1/2 w-[30rem] flex -translate-x-1/2 -translate-y-1/2 flex-col border-t-8 border-t-pink-500 px-5 py-3 lg:top-1/2 lg:px-8 lg:py-6"
+      modal_frame_classNames="top-1/2 left-1/2 flex w-[30rem] -translate-x-1/2 -translate-y-1/2 flex-col border-t-8 border-t-pink-500 px-5 py-3 lg:top-1/2 lg:px-8 lg:py-6"
       content={
-        <form onSubmit={(e) => {
-          e.preventDefault();
-          if (name.length === 0 || color.length === 0) {
-            return;
-          }
-          create_habit.mutate({ name, color });
-        }
-        }>
-          <RadixModal.Title className="text-3xl font-bold text-slate-700 whitespace-nowrap">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (name.length === 0 || color.length === 0) {
+              return;
+            }
+            create_habit.mutate({ name, color });
+          }}
+        >
+          <RadixModal.Title className="whitespace-nowrap text-3xl font-bold text-slate-700">
             Create New Habit
           </RadixModal.Title>
           <div className="h-1 lg:h-4" />
@@ -82,14 +84,17 @@ function AddNewHabitButton() {
               Cancel
             </button>
             <button
-              className={`rounded-full bg-pink-500 px-3 py-2 text-xs font-semibold text-white lg:px-5 lg:py-3 lg:text-base lg:font-bold ${add_habit_disabled
-                ? "opacity-50"
-                : "hover:cursor-pointer hover:brightness-110"
-                }`}
+              className={`rounded-full bg-pink-500 px-3 py-2 text-xs font-semibold text-white lg:px-5 lg:py-3 lg:text-base lg:font-bold ${
+                add_habit_disabled
+                  ? "opacity-50"
+                  : "hover:cursor-pointer hover:brightness-110"
+              }`}
               type="submit"
               disabled={add_habit_disabled}
             >
-              {create_habit.status === "loading" && <Spinner className="h-4 w-4 border-2 border-solid border-white lg:mx-[1.33rem] lg:my-1" />}
+              {create_habit.status === "loading" && (
+                <Spinner className="h-4 w-4 border-2 border-solid border-white lg:mx-[1.33rem] lg:my-1" />
+              )}
               {create_habit.status !== "loading" && "Create Habit"}
             </button>
           </div>
@@ -102,9 +107,6 @@ const Home: NextPage = () => {
   const all_habits = api.habit.get_all.useQuery();
   const [filter_text, set_filter_text] = useState("");
 
-  if (all_habits.status === "loading") {
-    return <div>Loading...</div>;
-  }
   if (all_habits.status === "error") {
     console.error(all_habits.error);
   }
@@ -121,6 +123,11 @@ const Home: NextPage = () => {
       ></input>
       <div className="h-2 md:h-4" />
       <ul className="flex flex-col gap-4 rounded-lg bg-slate-500 p-2 md:p-4">
+        {all_habits.status === "loading" && (
+          <div className="flex h-[95vh] items-center justify-center">
+            <Spinner className="h-16 w-16 border-4 border-solid border-white lg:border-8" />
+          </div>
+        )}
         {all_habits.status === "error" && (
           <div className="flex h-[95vh] items-center justify-center">
             <h1 className="text-white">
@@ -135,20 +142,19 @@ const Home: NextPage = () => {
             </h1>
           </div>
         )}
-        {all_habits.status === "success" && all_habits.data.length > 0 && (
+        {all_habits.status === "success" &&
+          all_habits.data.length > 0 &&
           all_habits.data
             .filter((habit) => {
+              if (filter_text.length === 0) return true;
               const filter_text_lower = filter_text.toLowerCase();
               const habit_name_lower = habit.name.toLowerCase();
               return (
-                filter_text.length === 0 ||
                 filter_text_lower.includes(habit_name_lower) ||
                 habit_name_lower.includes(filter_text_lower)
               );
             })
-            .map((habit) => {
-              return <HabitDisplay habit={habit} year={2023} />;
-            }))}
+            .map((habit) => <HabitDisplay habit={habit} year={2023} />)}
       </ul>
       <AddNewHabitButton />
     </div>

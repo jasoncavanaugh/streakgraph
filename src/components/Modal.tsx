@@ -1,8 +1,4 @@
 import * as RadixModal from "@radix-ui/react-dialog";
-
-function get_border_color(top_border: "red-500") {
-  return "border-t-8 border-t-red-500";
-}
 interface Props {
   trigger: JSX.Element;
   open?: boolean;

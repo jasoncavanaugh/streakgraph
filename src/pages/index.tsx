@@ -6,9 +6,9 @@ import { signIn, signOut, useSession } from "next-auth/react";
 import { useState } from "react";
 
 import { api } from "../utils/api";
-import { Modal } from "./components/Modal";
-import { HabitDisplay } from "./components/HabitDisplay";
-import { Spinner } from "./components/Spinner";
+import { Modal } from "../components/Modal";
+import { HabitDisplay } from "../components/HabitDisplay";
+import { Spinner } from "../components/Spinner";
 
 const input_classes = "rounded border border-slate-600 px-2 py-1";
 function AddNewHabitButton() {

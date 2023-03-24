@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Modal } from "./Modal";
 import * as RadixModal from "@radix-ui/react-dialog";
-import { api } from "../../utils/api";
+import { api } from "../utils/api";
 import { HabitDayDrop } from "@prisma/client";
-import { HabitWithDayDrops } from "../../server/api/routers/habitRouter";
+import { HabitWithDayDrops } from "../server/api/routers/habitRouter";
 import * as Tooltip from "@radix-ui/react-tooltip";
 import { Spinner } from "./Spinner";
 // import { PlusIcon } from '@radix-ui/react-icons';
@@ -381,6 +381,7 @@ export const HabitDisplay = (props: IHabitDisplayProps) => {
   //   },
   //   []
   // );
+        // {props.habit.name}
   const number_of_total_squares_including_hidden = 365;
   const first_day_of_year = 5;
 

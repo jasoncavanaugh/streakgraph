@@ -6,6 +6,7 @@ import { HabitDayDrop } from "@prisma/client";
 import { HabitWithDayDrops } from "../server/api/routers/habitRouter";
 import * as Tooltip from "@radix-ui/react-tooltip";
 import { Spinner } from "./Spinner";
+import { DropdownMenu } from "@radix-ui/react-dropdown-menu";
 // import { PlusIcon } from '@radix-ui/react-icons';
 // import './styles.css';
 interface IHabitDayDropTooltipProps {
@@ -13,11 +14,11 @@ interface IHabitDayDropTooltipProps {
   on_click: () => void;
   content: string;
 }
-const HabitDayDropTooltip = ({
+function HabitDayDropTooltip({
   is_checked,
   on_click,
   content,
-}: IHabitDayDropTooltipProps) => {
+}: IHabitDayDropTooltipProps) {
   return (
     <Tooltip.Provider delayDuration={100} skipDelayDuration={0}>
       <Tooltip.Root>
@@ -347,7 +348,7 @@ const HabitSquaresDisplay = ({
   return <>{output}</>;
 };
 
-function is_today_marked(habit_day_drops: HabitDayDrop[]) {
+function determine_whether_today_is_marked(habit_day_drops: HabitDayDrop[]) {
   const today = new Date();
   const today_day = today.getDate();//Wtf. Why is it called this
   const today_month = today.getMonth();
@@ -382,30 +383,33 @@ export const HabitDisplay = (props: IHabitDisplayProps) => {
     },
     []
   );
-
+  const is_today_marked = determine_whether_today_is_marked(props.habit.habit_day_drops);
   return (
     <li key={props.habit.id} className="rounded-lg border bg-white p-2 md:p-4">
       <div className="flex justify-between">
         <h1 className="flex justify-start text-xl font-semibold text-slate-700 md:text-2xl lg:text-3xl">
           {props.habit.name}
         </h1>
+        <div className="flex">
+          <SelectYearDropdown/>
         <button
-          className="border bg-pink-500 text-white text-sm md:text-base px-4 font-semibold hover:brightness-110 rounded-full"
+          className="rounded-full border bg-pink-500 px-4 text-sm font-semibold text-white hover:brightness-110 md:text-base"
           onClick={(e) => {
             e.preventDefault();
-            if (is_today_marked(props.habit.habit_day_drops)) {
+            if (is_today_marked) {
               delete_day_drop.mutate({ habit_id: props.habit.id, year: new Date().getFullYear(), month: new Date().getMonth() + 1, day: new Date().getDate() });
             } else {
               create_day_drop.mutate({ habit_id: props.habit.id, year: new Date().getFullYear(), month: new Date().getMonth() + 1, day: new Date().getDate() });
             }
           }}
         >
-          {is_today_marked(props.habit.habit_day_drops) ? "Unmark today" : "Mark today"}
+          {is_today_marked ? "Unmark today" : "Mark today"}
         </button>
+        </div>
       </div>
       <div className="h-2 md:h-4" />
-      <div className="flex">
-        <div className="flex flex-col justify-around mt-[-0.25rem] mr-4 mb-4">
+      <div className="flex gap-0">
+        <div className="mt-[-0.25rem] mr-2 mb-4 flex flex-col justify-around text-xs lg:mr-4 lg:text-base">
           <p>Sun</p>
           <p>Mon</p>
           <p>Tue</p>
@@ -415,7 +419,7 @@ export const HabitDisplay = (props: IHabitDisplayProps) => {
           <p>Sat</p>
         </div>
         <div className="overflow-x-auto">
-          <div className="jason gap-[0.15rem] md:gap-[0.2rem] lg:gap-[0.3rem] mb-4">
+          <div className="jason mb-4 gap-[0.15rem] md:gap-[0.2rem] lg:gap-[0.3rem]">
             <HabitSquaresDisplay
               number_of_total_squares_including_hidden={
                 number_of_total_squares_including_hidden

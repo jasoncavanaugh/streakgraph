@@ -65,14 +65,14 @@ function AddNewHabitButton() {
               autoComplete="off"
               type="text"
             ></input>
-            <label htmlFor="habit-color">Color:</label>
+            { /* <label htmlFor="habit-color">Color:</label>
             <input
               name="habit-color"
               onChange={(e) => set_color(e.target.value)}
               autoComplete="off"
               className={input_classes}
               type="text"
-            ></input>
+            ></input> */}
           </div>
           <div className="h-8" />
           <div className="flex justify-center gap-5">

@@ -297,8 +297,6 @@ const HabitSquaresDisplay = ({
 }: IHabitSquaresDisplay) => {
   const create_day_drop = use_create_day_drop();
   const delete_day_drop = use_delete_day_drop();
-
-
   //UI
   let output = [];
   for (let i = 1; i < first_day_of_year; i++) {
@@ -341,7 +339,7 @@ const HabitSquaresDisplay = ({
             });
           }
         }}
-        content={`${day_name} ${year}-${month}-${day}`}
+        content={`${day_name} ${month}-${day}`}
       />
     );
   }
@@ -406,18 +404,28 @@ export const HabitDisplay = (props: IHabitDisplayProps) => {
         </button>
       </div>
       <div className="h-2 md:h-4" />
-      <div className="flex flex-col overflow-x-auto">
-        <div className="jason gap-[0.15rem] md:gap-[0.2rem] lg:gap-[0.3rem]">
-          <HabitSquaresDisplay
-            number_of_total_squares_including_hidden={
-              number_of_total_squares_including_hidden
-            }
-            first_day_of_year={first_day_of_year}
-            habit={props.habit}
-            year={props.year}
-          />
+      <div className="flex">
+        <div className="flex flex-col justify-around mt-[-0.25rem] mr-4 mb-4">
+          <p>Sun</p>
+          <p>Mon</p>
+          <p>Tue</p>
+          <p>Wed</p>
+          <p>Thu</p>
+          <p>Fri</p>
+          <p>Sat</p>
         </div>
-        <div className="h-2 md:h-4" />
+        <div className="overflow-x-auto">
+          <div className="jason gap-[0.15rem] md:gap-[0.2rem] lg:gap-[0.3rem] mb-4">
+            <HabitSquaresDisplay
+              number_of_total_squares_including_hidden={
+                number_of_total_squares_including_hidden
+              }
+              first_day_of_year={first_day_of_year}
+              habit={props.habit}
+              year={props.year}
+            />
+          </div>
+        </div>
       </div>
       <div className="h-2 md:h-4" />
       <DeleteHabit id={props.habit.id} />

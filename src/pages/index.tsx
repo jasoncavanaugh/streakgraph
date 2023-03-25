@@ -41,7 +41,7 @@ function AddNewHabitButton() {
           +
         </button>
       }
-      modal_frame_classNames="top-1/2 left-1/2 flex w-[30rem] -translate-x-1/2 -translate-y-1/2 flex-col border-t-8 border-t-pink-500 px-5 py-3 lg:top-1/2 lg:px-8 lg:py-6"
+      modal_frame_classNames="top-1/3 left-1/2 flex w-[30rem] -translate-x-1/2 -translate-y-1/2 flex-col border-t-8 border-t-pink-500 px-5 py-3 lg:top-1/2 lg:top-1/2 lg:px-8 lg:py-6"
       content={
         <form
           onSubmit={(e) => {

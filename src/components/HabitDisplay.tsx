@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Modal } from "./Modal";
 import * as RadixModal from "@radix-ui/react-dialog";
 import { api } from "../utils/api";
@@ -74,7 +74,7 @@ const DeleteHabit = ({ id }: IDeleteHabitProps) => {
           Remove
         </button>
       }
-      modal_frame_classNames="top-1/2 left-1/2 w-[20rem] lg:w-[30rem] flex -translate-x-1/2 -translate-y-1/2 flex-col border-t-8 border-t-red-500 px-5 py-3 lg:top-1/2 lg:px-8 lg:py-6"
+      modal_frame_classNames="left-1/2 top-1/2 flex w-[20rem] -translate-x-1/2 -translate-y-1/2 flex-col border-t-8 border-t-red-500 px-5 py-3 lg:top-1/2 lg:w-[30rem] lg:px-8 lg:py-6"
       content={
         <form
           onSubmit={(e) => {
@@ -369,27 +369,26 @@ interface IHabitDisplayProps {
   year: number;
 }
 export const HabitDisplay = (props: IHabitDisplayProps) => {
-  // const [number_of_total_squares_including_hidden, first_day_of_year] = useMemo(
-  //   () => {
-  //     console.log("In useMemo");
-  //     const first_day_of_year = get_first_day_of_year(props.year);
-  //     const number_of_total_squares_including_hidden = get_number_of_days_in_year(props.year) + first_day_of_year - 1;
-  //     return [
-  //       number_of_total_squares_including_hidden,
-  //       first_day_of_year
-  //     ]
-  //   },
-  //   []
-  // );
-        // {props.habit.name}
-  const number_of_total_squares_including_hidden = 365;
-  const first_day_of_year = 5;
+  const [number_of_total_squares_including_hidden, first_day_of_year] = useMemo(
+    () => {
+      const first_day_of_year = get_first_day_of_year(props.year);
+      const number_of_total_squares_including_hidden = get_number_of_days_in_year(props.year) + first_day_of_year - 1;
+      return [
+        number_of_total_squares_including_hidden,
+        first_day_of_year
+      ]
+    },
+    []
+  );
 
   return (
     <li key={props.habit.id} className="rounded-lg border bg-white p-2 md:p-4">
+      <div>
       <h1 className="flex justify-start text-xl font-semibold text-slate-700 md:text-2xl lg:text-3xl">
         {props.habit.name}
       </h1>
+      <button>Click</button>
+      </div>
       <div className="h-2 md:h-4" />
       <div className="flex flex-col overflow-x-auto">
         <div className="jason gap-[0.15rem] md:gap-[0.2rem] lg:gap-[0.3rem]">

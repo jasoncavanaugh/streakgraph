@@ -23,9 +23,8 @@ const HabitDayDropTooltip = ({
       <Tooltip.Root>
         <Tooltip.Trigger asChild>
           <div
-            className={`h-[20px] w-[20px] rounded-sm border border-pink-500 hover:cursor-pointer hover:brightness-110 md:rounded md:border lg:h-[30px] lg:w-[30px] ${
-              is_checked ? "bg-pink-500" : ""
-            }`}
+            className={`h-[20px] w-[20px] rounded-sm border border-pink-500 hover:cursor-pointer hover:brightness-110 md:rounded md:border lg:h-[30px] lg:w-[30px] ${is_checked ? "bg-pink-500" : ""
+              }`}
             onClick={on_click}
           />
         </Tooltip.Trigger>
@@ -43,160 +42,9 @@ const HabitDayDropTooltip = ({
   );
 };
 
-interface IDeleteHabitProps {
-  id: string;
-}
-const DeleteHabit = ({ id }: IDeleteHabitProps) => {
-  const [loading, set_loading] = useState(false);
-  const [is_modal_open, set_is_modal_open] = useState(false);
-
+function use_create_day_drop() {
   const api_utils = api.useContext();
-  const delete_habit = api.habit.delete.useMutation({
-    onSuccess: () => {
-      api_utils.habit.get_all.invalidate();
-      // set_loading(false);
-      set_is_modal_open(false); //TODO: Have to figure out how to close the modal once the new data comes in
-    },
-    onError: (err, data, ctx) => {
-      alert("error");
-    },
-  });
-
-  return (
-    <Modal
-      open={is_modal_open}
-      trigger={
-        <button
-          type="button"
-          className="rounded-full bg-red-500 py-2 px-4 text-sm font-semibold text-white outline-none hover:brightness-110 md:py-2 md:px-4 md:text-base lg:text-base"
-          onClick={() => set_is_modal_open(true)}
-        >
-          Remove
-        </button>
-      }
-      modal_frame_classNames="left-1/2 top-1/2 flex w-[20rem] -translate-x-1/2 -translate-y-1/2 flex-col border-t-8 border-t-red-500 px-5 py-3 lg:top-1/2 lg:w-[30rem] lg:px-8 lg:py-6"
-      content={
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            delete_habit.mutate({ id });
-          }}
-        >
-          <RadixModal.Title className="whitespace-nowrap text-3xl font-bold text-slate-700">
-            Delete Habit
-          </RadixModal.Title>
-          <div className="h-1 lg:h-4" />
-          <div className="flex w-full flex-col gap-4">
-            Are you sure you wish to delete this habit?
-          </div>
-          <div className="h-8" />
-          <div className="flex justify-center gap-5">
-            <button
-              className="rounded-full bg-slate-500 px-5 py-3 text-xs font-semibold text-white outline-none hover:brightness-110 lg:text-base lg:font-bold"
-              type="button"
-              onClick={() => set_is_modal_open(false)}
-            >
-              Cancel
-            </button>
-
-            <button
-              className="rounded-full bg-red-500 px-5 py-3 text-xs font-semibold text-white outline-none hover:brightness-110 lg:text-base lg:font-bold"
-              type="submit"
-            >
-              {delete_habit.status === "loading" && (
-                <Spinner className="h-4 w-4 border-2 border-solid border-white lg:mx-[1.33rem] lg:my-1" />
-              )}
-              {delete_habit.status !== "loading" && "Delete"}
-            </button>
-          </div>
-        </form>
-      }
-    />
-  );
-};
-
-{
-  /*
-
-<div className="absolute right-1/2 bottom-1/2  transform translate-x-1/2 translate-y-1/2 ">
-  <div className="flex items-center justify-center space-x-2">
-  <div className="w-1 h-1 rounded-full animate-pulse bg-white"></div>
-  <div className="w-1 h-1 rounded-full animate-pulse bg-white"></div>
-  <div className="w-1 h-1 rounded-full animate-pulse bg-white"></div>
-  </div>
-*/
-}
-
-const day_names = ["Sun", "Mon", "Tues", "Wed", "Thur", "Fri", "Sat"];
-function get_day_name(year: number, month_idx: number, day: number) {
-  return day_names[new Date(year, month_idx, day).getDay()]!;
-}
-
-function get_number_of_days_in_year(year: number) {
-  if (year % 4 !== 0) {
-    return 365;
-  }
-  if (year % 100 !== 0) {
-    return 366;
-  }
-  if (year % 400 !== 0) {
-    return 365;
-  }
-  return 366;
-}
-
-function check_if_checked(
-  day_out_of_year: number,
-  drops: HabitDayDrop[],
-  year: number
-) {
-  let months = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-  if (get_number_of_days_in_year(year) === 366) {
-    months[1] += 1;
-  }
-  let idx = 0;
-  for (; idx < months.length && day_out_of_year > months[idx]!; idx++) {
-    day_out_of_year -= months[idx]!;
-  }
-
-  return (
-    drops.filter(
-      (drop) => drop.month === idx + 1 && drop.day === day_out_of_year
-    ).length > 0
-  );
-}
-
-function get_day_and_month(
-  day_out_of_year: number,
-  drops: HabitDayDrop[],
-  year: number
-) {
-  let months = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-  if (get_number_of_days_in_year(year) === 366) {
-    months[1] += 1;
-  }
-  let idx = 0;
-  for (; idx < months.length && day_out_of_year > months[idx]!; idx++) {
-    day_out_of_year -= months[idx]!;
-  }
-
-  return [idx + 1, day_out_of_year];
-}
-
-interface IHabitSquaresDisplay {
-  number_of_total_squares_including_hidden: number;
-  first_day_of_year: number;
-  habit: HabitWithDayDrops;
-  year: number;
-}
-const HabitSquaresDisplay = ({
-  number_of_total_squares_including_hidden,
-  first_day_of_year,
-  habit,
-  year,
-}: IHabitSquaresDisplay) => {
-  const api_utils = api.useContext();
-  const create_day_drop = api.habit.create_day_drop.useMutation({
+  return api.habit.create_day_drop.useMutation({
     onMutate: async (variables) => {
       const { habit_id, year, month, day } = variables;
       // Cancel outgoing fetches (so they don't overwrite our optimistic update)
@@ -249,8 +97,10 @@ const HabitSquaresDisplay = ({
       api_utils.habit.get_all.invalidate();
     },
   });
-
-  const delete_day_drop = api.habit.delete_day_drop.useMutation({
+}
+function use_delete_day_drop() {
+  const api_utils = api.useContext();
+  return api.habit.delete_day_drop.useMutation({
     async onMutate(variables) {
       const { habit_id, year, month, day } = variables;
       // Cancel outgoing fetches (so they don't overwrite our optimistic update)
@@ -304,6 +154,150 @@ const HabitSquaresDisplay = ({
       api_utils.habit.get_all.invalidate();
     },
   });
+};
+
+interface IDeleteHabitProps {
+  id: string;
+}
+const DeleteHabit = ({ id }: IDeleteHabitProps) => {
+  const [loading, set_loading] = useState(false);
+  const [is_modal_open, set_is_modal_open] = useState(false);
+
+  const api_utils = api.useContext();
+  const delete_habit = api.habit.delete.useMutation({
+    onSuccess: () => {
+      api_utils.habit.get_all.invalidate();
+      // set_loading(false);
+      set_is_modal_open(false); //TODO: Have to figure out how to close the modal once the new data comes in
+    },
+    onError: (err, data, ctx) => {
+      alert("error");
+    },
+  });
+
+  return (
+    <Modal
+      open={is_modal_open}
+      trigger={
+        <button
+          type="button"
+          className="rounded-full bg-red-500 py-2 px-4 text-sm font-semibold text-white hover:brightness-110 md:py-2 md:px-4 md:text-base"
+          onClick={() => set_is_modal_open(true)}
+        >
+          Remove
+        </button>
+      }
+      modal_frame_classNames="left-1/2 top-1/2 flex w-[20rem] -translate-x-1/2 -translate-y-1/2 flex-col border-t-8 border-t-red-500 px-5 py-3 lg:top-1/2 lg:w-[30rem] lg:px-8 lg:py-6"
+      content={
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            delete_habit.mutate({ id });
+          }}
+        >
+          <RadixModal.Title className="whitespace-nowrap text-3xl font-bold text-slate-700">
+            Delete Habit
+          </RadixModal.Title>
+          <div className="h-1 lg:h-4" />
+          <div className="flex w-full flex-col gap-4">
+            Are you sure you wish to delete this habit?
+          </div>
+          <div className="h-8" />
+          <div className="flex justify-center gap-5">
+            <button
+              className="rounded-full bg-slate-500 px-5 py-3 text-xs font-semibold text-white outline-none hover:brightness-110 lg:text-base lg:font-bold"
+              type="button"
+              onClick={() => set_is_modal_open(false)}
+            >
+              Cancel
+            </button>
+
+            <button
+              className="rounded-full bg-red-500 px-5 py-3 text-xs font-semibold text-white outline-none hover:brightness-110 lg:text-base lg:font-bold"
+              type="submit"
+            >
+              {delete_habit.status === "loading" && (
+                <Spinner className="h-4 w-4 border-2 border-solid border-white lg:mx-[1.33rem] lg:my-1" />
+              )}
+              {delete_habit.status !== "loading" && "Delete"}
+            </button>
+          </div>
+        </form>
+      }
+    />
+  );
+}
+
+const day_names = ["Sun", "Mon", "Tues", "Wed", "Thur", "Fri", "Sat"];
+function get_day_name(year: number, month_idx: number, day: number) {
+  return day_names[new Date(year, month_idx, day).getDay()]!;
+}
+
+function get_number_of_days_in_year(year: number) {
+  if (year % 4 !== 0) {
+    return 365;
+  }
+  if (year % 100 !== 0) {
+    return 366;
+  }
+  if (year % 400 !== 0) {
+    return 365;
+  }
+  return 366;
+}
+
+function check_if_checked(
+  day_out_of_year: number,
+  drops: HabitDayDrop[],
+  year: number
+) {
+  let months = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  if (get_number_of_days_in_year(year) === 366) {
+    months[1] += 1;
+  }
+  let idx = 0;
+  for (; idx < months.length && day_out_of_year > months[idx]!; idx++) {
+    day_out_of_year -= months[idx]!;
+  }
+
+  return (
+    drops.filter(
+      (drop) => drop.month === idx + 1 && drop.day === day_out_of_year
+    ).length > 0
+  );
+}
+
+function get_day_and_month(
+  day_out_of_year: number,
+  year: number
+) {
+  let months = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  if (get_number_of_days_in_year(year) === 366) {
+    months[1] += 1;
+  }
+  let idx = 0;
+  for (; idx < months.length && day_out_of_year > months[idx]!; idx++) {
+    day_out_of_year -= months[idx]!;
+  }
+
+  return [idx + 1, day_out_of_year];
+}
+
+interface IHabitSquaresDisplay {
+  number_of_total_squares_including_hidden: number;
+  first_day_of_year: number;
+  habit: HabitWithDayDrops;
+  year: number;
+}
+const HabitSquaresDisplay = ({
+  number_of_total_squares_including_hidden,
+  first_day_of_year,
+  habit,
+  year,
+}: IHabitSquaresDisplay) => {
+  const create_day_drop = use_create_day_drop();
+  const delete_day_drop = use_delete_day_drop();
+
 
   //UI
   let output = [];
@@ -320,11 +314,7 @@ const HabitSquaresDisplay = ({
       habit.habit_day_drops,
       year
     );
-    const [month, day] = get_day_and_month(
-      i - first_day_of_year + 1,
-      habit.habit_day_drops,
-      year
-    );
+    const [month, day] = get_day_and_month(i - first_day_of_year + 1, year);
     if (!month || !day) {
       throw new Error("Eff my life");
     }
@@ -332,6 +322,7 @@ const HabitSquaresDisplay = ({
     const day_name = get_day_name(year, month - 1, day);
     output.push(
       <HabitDayDropTooltip
+        key={i}
         is_checked={is_checked}
         on_click={() => {
           if (is_checked) {
@@ -358,6 +349,17 @@ const HabitSquaresDisplay = ({
   return <>{output}</>;
 };
 
+function is_today_marked(habit_day_drops: HabitDayDrop[]) {
+  const today = new Date();
+  const today_day = today.getDate();//Wtf. Why is it called this
+  const today_month = today.getMonth();
+  const today_year = today.getFullYear();
+
+  return habit_day_drops.filter((drop) => {
+    return drop.year === today_year && drop.month === today_month + 1 && drop.day === today_day;
+  }).length > 0;
+}
+
 function get_first_day_of_year(year: number) {
   const january = 0;
   const first = 1;
@@ -369,6 +371,8 @@ interface IHabitDisplayProps {
   year: number;
 }
 export const HabitDisplay = (props: IHabitDisplayProps) => {
+  const create_day_drop = use_create_day_drop();
+  const delete_day_drop = use_delete_day_drop();
   const [number_of_total_squares_including_hidden, first_day_of_year] = useMemo(
     () => {
       const first_day_of_year = get_first_day_of_year(props.year);
@@ -383,11 +387,23 @@ export const HabitDisplay = (props: IHabitDisplayProps) => {
 
   return (
     <li key={props.habit.id} className="rounded-lg border bg-white p-2 md:p-4">
-      <div>
-      <h1 className="flex justify-start text-xl font-semibold text-slate-700 md:text-2xl lg:text-3xl">
-        {props.habit.name}
-      </h1>
-      <button>Click</button>
+      <div className="flex justify-between">
+        <h1 className="flex justify-start text-xl font-semibold text-slate-700 md:text-2xl lg:text-3xl">
+          {props.habit.name}
+        </h1>
+        <button
+          className="border bg-pink-500 text-white text-sm md:text-base px-4 font-semibold hover:brightness-110 rounded-full"
+          onClick={(e) => {
+            e.preventDefault();
+            if (is_today_marked(props.habit.habit_day_drops)) {
+              delete_day_drop.mutate({ habit_id: props.habit.id, year: new Date().getFullYear(), month: new Date().getMonth() + 1, day: new Date().getDate() });
+            } else {
+              create_day_drop.mutate({ habit_id: props.habit.id, year: new Date().getFullYear(), month: new Date().getMonth() + 1, day: new Date().getDate() });
+            }
+          }}
+        >
+          {is_today_marked(props.habit.habit_day_drops) ? "Unmark today" : "Mark today"}
+        </button>
       </div>
       <div className="h-2 md:h-4" />
       <div className="flex flex-col overflow-x-auto">

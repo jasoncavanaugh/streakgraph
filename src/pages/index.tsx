@@ -93,7 +93,7 @@ function AddNewHabitButton() {
               disabled={add_habit_disabled}
             >
               {create_habit.status === "loading" && (
-                <Spinner className="h-4 w-4 border-2 border-solid border-white lg:mx-[1.33rem] lg:my-1" />
+                <Spinner className="h-4 w-4 border-2 border-solid border-white mx-[2.1rem] lg:mx-[3.1rem] lg:my-1" />
               )}
               {create_habit.status !== "loading" && "Create Habit"}
             </button>

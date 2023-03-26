@@ -1,5 +1,22 @@
 import { api } from "../api";
 
+function create_day_drop_mutation_fn(variables: {
+  habit_id: string;
+  year: number;
+  month: number;
+  day: number;
+}) {
+
+}
+
+function delete_day_drop_mutation_fn(variables: {
+  habit_id: string;
+  year: number;
+  month: number;
+  day: number;
+}) {
+
+}
 export function use_create_day_drop() {
   const api_utils = api.useContext();
   return api.habit.create_day_drop.useMutation({
@@ -59,7 +76,7 @@ export function use_create_day_drop() {
 export function use_delete_day_drop() {
   const api_utils = api.useContext();
   return api.habit.delete_day_drop.useMutation({
-    async onMutate(variables) {
+    onMutate: async (variables) => {
       const { habit_id, year, month, day } = variables;
       // Cancel outgoing fetches (so they don't overwrite our optimistic update)
       await api_utils.habit.get_all.cancel();
@@ -103,11 +120,11 @@ export function use_delete_day_drop() {
       // Return the previous data so we can revert if something goes wrong
       return { prev_data };
     },
-    onError(err, data, ctx) {
+    onError: (err, data, ctx) => {
       console.error(err);
       api_utils.habit.get_all.setData(undefined, ctx?.prev_data);
     },
-    onSettled() {
+    onSettled: () => {
       console.log("onSettled");
       // api_utils.habit.invalidate();
       api_utils.habit.get_all.invalidate();

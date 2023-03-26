@@ -2,11 +2,11 @@ import { useMemo, useState } from "react";
 import { Modal } from "./Modal";
 import * as RadixModal from "@radix-ui/react-dialog";
 import { api } from "../utils/api";
-import { HabitWithDayDrops } from "../server/api/routers/habitRouter";
 import * as Tooltip from "@radix-ui/react-tooltip";
 import { Spinner } from "./Spinner";
 import { check_if_marked, determine_whether_today_is_marked, get_day_and_month, get_day_name, get_day_out_of_year, get_first_day_of_year, get_number_of_days_in_year } from "../utils/calendar";
 import { use_create_day_drop, use_delete_day_drop } from "../utils/hooks/habitHooks";
+import { HabitWithDayDrops } from "../utils/types";
 
 
 interface IHabitDayDropTooltipProps {

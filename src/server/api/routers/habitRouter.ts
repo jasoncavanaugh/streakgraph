@@ -1,23 +1,15 @@
 import { z } from "zod";
-import { Prisma } from "@prisma/client";
 import { createTRPCRouter, publicProcedure, protectedProcedure } from "../trpc";
-
-//WTF is this
-const habit_with_habit_day_drops = Prisma.validator<Prisma.HabitArgs>()({
-  include: { habit_day_drops: true },
-});
-export type HabitWithDayDrops = Prisma.HabitGetPayload<
-  typeof habit_with_habit_day_drops
->;
 
 //API
 export const habit_router = createTRPCRouter({
-  get_all: publicProcedure.query(({ ctx }) => {
-    return ctx.prisma.habit.findMany({
+  get_all: publicProcedure.query(async ({ ctx }) => {
+    return await ctx.prisma.habit.findMany({
       include: {
         habit_day_drops: true,
       },
     });
+
   }),
   create: publicProcedure
     .input(z.object({ name: z.string(), color: z.string() }))

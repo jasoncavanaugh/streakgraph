@@ -42,7 +42,7 @@ function AddNewHabitButton() {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            if (name.length === 0 || color.length === 0) {
+            if (name.length === 0) {
               return;
             }
             create_habit.mutate({ name, color });

@@ -27,7 +27,7 @@ function AddNewHabitButton() {
 
   const add_habit_disabled =
     name.length === 0 ||
-    color.length === 0 ||
+    // color.length === 0 ||
     create_habit.status === "loading";
   return (
     <Modal

@@ -6,9 +6,7 @@ import { HabitDayDrop } from "@prisma/client";
 import { HabitWithDayDrops } from "../server/api/routers/habitRouter";
 import * as Tooltip from "@radix-ui/react-tooltip";
 import { Spinner } from "./Spinner";
-import { DropdownMenu } from "@radix-ui/react-dropdown-menu";
-// import { PlusIcon } from '@radix-ui/react-icons';
-// import './styles.css';
+
 interface IHabitDayDropTooltipProps {
   is_checked: boolean;
   on_click: () => void;
@@ -390,8 +388,6 @@ export const HabitDisplay = (props: IHabitDisplayProps) => {
         <h1 className="flex justify-start text-xl font-semibold text-slate-700 md:text-2xl lg:text-3xl">
           {props.habit.name}
         </h1>
-        <div className="flex">
-          <SelectYearDropdown/>
         <button
           className="rounded-full border bg-pink-500 px-4 text-sm font-semibold text-white hover:brightness-110 md:text-base"
           onClick={(e) => {
@@ -405,7 +401,6 @@ export const HabitDisplay = (props: IHabitDisplayProps) => {
         >
           {is_today_marked ? "Unmark today" : "Mark today"}
         </button>
-        </div>
       </div>
       <div className="h-2 md:h-4" />
       <div className="flex gap-0">

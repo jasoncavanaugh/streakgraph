@@ -1,10 +1,6 @@
-import { type NextPage } from "next";
+import type { NextPage } from "next";
 import * as RadixModal from "@radix-ui/react-dialog";
-import Head from "next/head";
-import Link from "next/link";
-import { signIn, signOut, useSession } from "next-auth/react";
 import { useState } from "react";
-
 import { api } from "../utils/api";
 import { Modal } from "../components/Modal";
 import { HabitDisplay } from "../components/HabitDisplay";
@@ -65,7 +61,7 @@ function AddNewHabitButton() {
               autoComplete="off"
               type="text"
             ></input>
-            { /* <label htmlFor="habit-color">Color:</label>
+            {/* <label htmlFor="habit-color">Color:</label>
             <input
               name="habit-color"
               onChange={(e) => set_color(e.target.value)}
@@ -93,7 +89,7 @@ function AddNewHabitButton() {
               disabled={add_habit_disabled}
             >
               {create_habit.status === "loading" && (
-                <Spinner className="h-4 w-4 border-2 border-solid border-white mx-[2.1rem] lg:mx-[3.1rem] lg:my-1" />
+                <Spinner className="mx-[2.1rem] h-4 w-4 border-2 border-solid border-white lg:mx-[3.1rem] lg:my-1" />
               )}
               {create_habit.status !== "loading" && "Create Habit"}
             </button>

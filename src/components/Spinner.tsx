@@ -1,10 +1,11 @@
-
 interface ISpinnerProps {
   className?: string;
 }
-export function Spinner({ className = "" }: ISpinnerProps) { 
+export function Spinner({ className = "" }: ISpinnerProps) {
   return (
-    <div className={`animate-spin rounded-full border-t-transparent ${className}`}/>
+    <div
+      className={`animate-spin rounded-full border-t-transparent ${className}`}
+    />
   );
 }
 export default Spinner;

@@ -22,8 +22,9 @@ function HabitDayDropTooltip({
       <Tooltip.Root>
         <Tooltip.Trigger asChild>
           <div
-            className={`h-[20px] w-[20px] rounded-sm border border-pink-500 hover:cursor-pointer hover:brightness-110 md:rounded md:border lg:h-[30px] lg:w-[30px] ${is_checked ? "bg-pink-500" : ""
-              }`}
+            className={`h-[20px] w-[20px] rounded-sm border border-pink-500 hover:cursor-pointer hover:brightness-110 md:rounded md:border lg:h-[30px] lg:w-[30px] ${
+              is_checked ? "bg-pink-500" : ""
+            }`}
             onClick={on_click}
           />
         </Tooltip.Trigger>
@@ -39,7 +40,7 @@ function HabitDayDropTooltip({
       </Tooltip.Root>
     </Tooltip.Provider>
   );
-};
+}
 
 function use_create_day_drop() {
   const api_utils = api.useContext();
@@ -153,7 +154,7 @@ function use_delete_day_drop() {
       api_utils.habit.get_all.invalidate();
     },
   });
-};
+}
 
 interface IDeleteHabitProps {
   id: string;
@@ -225,7 +226,7 @@ const DeleteHabit = ({ id }: IDeleteHabitProps) => {
       }
     />
   );
-}
+};
 
 const day_names = ["Sun", "Mon", "Tues", "Wed", "Thur", "Fri", "Sat"];
 function get_day_name(year: number, month_idx: number, day: number) {
@@ -266,10 +267,7 @@ function check_if_checked(
   );
 }
 
-function get_day_and_month(
-  day_out_of_year: number,
-  year: number
-) {
+function get_day_and_month(day_out_of_year: number, year: number) {
   let months = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
   if (get_number_of_days_in_year(year) === 366) {
     months[1] += 1;
@@ -348,13 +346,19 @@ const HabitSquaresDisplay = ({
 
 function determine_whether_today_is_marked(habit_day_drops: HabitDayDrop[]) {
   const today = new Date();
-  const today_day = today.getDate();//Wtf. Why is it called this
+  const today_day = today.getDate(); //Wtf. Why is it called this
   const today_month = today.getMonth();
   const today_year = today.getFullYear();
 
-  return habit_day_drops.filter((drop) => {
-    return drop.year === today_year && drop.month === today_month + 1 && drop.day === today_day;
-  }).length > 0;
+  return (
+    habit_day_drops.filter((drop) => {
+      return (
+        drop.year === today_year &&
+        drop.month === today_month + 1 &&
+        drop.day === today_day
+      );
+    }).length > 0
+  );
 }
 
 function get_first_day_of_year(year: number) {
@@ -370,18 +374,16 @@ interface IHabitDisplayProps {
 export const HabitDisplay = (props: IHabitDisplayProps) => {
   const create_day_drop = use_create_day_drop();
   const delete_day_drop = use_delete_day_drop();
-  const [number_of_total_squares_including_hidden, first_day_of_year] = useMemo(
-    () => {
+  const [number_of_total_squares_including_hidden, first_day_of_year] =
+    useMemo(() => {
       const first_day_of_year = get_first_day_of_year(props.year);
-      const number_of_total_squares_including_hidden = get_number_of_days_in_year(props.year) + first_day_of_year - 1;
-      return [
-        number_of_total_squares_including_hidden,
-        first_day_of_year
-      ]
-    },
-    []
+      const number_of_total_squares_including_hidden =
+        get_number_of_days_in_year(props.year) + first_day_of_year - 1;
+      return [number_of_total_squares_including_hidden, first_day_of_year];
+    }, []);
+  const is_today_marked = determine_whether_today_is_marked(
+    props.habit.habit_day_drops
   );
-  const is_today_marked = determine_whether_today_is_marked(props.habit.habit_day_drops);
   return (
     <li key={props.habit.id} className="rounded-lg border bg-white p-2 md:p-4">
       <div className="flex justify-between">
@@ -393,9 +395,19 @@ export const HabitDisplay = (props: IHabitDisplayProps) => {
           onClick={(e) => {
             e.preventDefault();
             if (is_today_marked) {
-              delete_day_drop.mutate({ habit_id: props.habit.id, year: new Date().getFullYear(), month: new Date().getMonth() + 1, day: new Date().getDate() });
+              delete_day_drop.mutate({
+                habit_id: props.habit.id,
+                year: new Date().getFullYear(),
+                month: new Date().getMonth() + 1,
+                day: new Date().getDate(),
+              });
             } else {
-              create_day_drop.mutate({ habit_id: props.habit.id, year: new Date().getFullYear(), month: new Date().getMonth() + 1, day: new Date().getDate() });
+              create_day_drop.mutate({
+                habit_id: props.habit.id,
+                year: new Date().getFullYear(),
+                month: new Date().getMonth() + 1,
+                day: new Date().getDate(),
+              });
             }
           }}
         >

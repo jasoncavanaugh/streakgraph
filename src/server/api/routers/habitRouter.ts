@@ -9,7 +9,6 @@ export const habit_router = createTRPCRouter({
         habit_day_drops: true,
       },
     });
-
   }),
   create: publicProcedure
     .input(z.object({ name: z.string(), color: z.string() }))

@@ -55,16 +55,23 @@ export function get_day_and_month(day_out_of_year: number, year: number) {
   return [idx + 1, day_out_of_year];
 }
 
-
-export function determine_whether_today_is_marked(habit_day_drops: HabitDayDrop[]) {
+export function determine_whether_today_is_marked(
+  habit_day_drops: HabitDayDrop[]
+) {
   const today = new Date();
   const today_day = today.getDate(); //Wtf. Why is it called this
   const today_month = today.getMonth() + 1;
   const today_year = today.getFullYear();
   console.log("habit_day_drops", habit_day_drops);
-  return habit_day_drops.filter((drop) => drop.year === today_year && drop.month === today_month && drop.day === today_day).length > 0;
+  return (
+    habit_day_drops.filter(
+      (drop) =>
+        drop.year === today_year &&
+        drop.month === today_month &&
+        drop.day === today_day
+    ).length > 0
+  );
 }
-
 
 export function get_first_day_of_year(year: number) {
   const january = 0;
@@ -79,7 +86,7 @@ export function get_day_out_of_year(date: Date) {
   if (is_leap_year) {
     months[1] += 1;
   }
-  
+
   let day = date.getDate();
   let month_idx = date.getMonth();
   let day_out_of_year = 0;

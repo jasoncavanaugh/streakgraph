@@ -5,7 +5,6 @@ import { api } from "../utils/api";
 import { Modal } from "../components/Modal";
 import { HabitDisplay } from "../components/HabitDisplay";
 import { Spinner } from "../components/Spinner";
-import { HabitWithDayDrops } from "../server/api/routers/habitRouter";
 import { get_years } from "../utils/calendar";
 
 const input_classes = "rounded border border-slate-600 px-2 py-1";

@@ -4,10 +4,20 @@ import * as RadixModal from "@radix-ui/react-dialog";
 import { api } from "../utils/api";
 import * as Tooltip from "@radix-ui/react-tooltip";
 import { Spinner } from "./Spinner";
-import { check_if_marked, determine_whether_today_is_marked, get_day_and_month, get_day_name, get_day_out_of_year, get_first_day_of_year, get_number_of_days_in_year } from "../utils/calendar";
-import { use_create_day_drop, use_delete_day_drop } from "../utils/hooks/habitHooks";
+import {
+  check_if_marked,
+  determine_whether_today_is_marked,
+  get_day_and_month,
+  get_day_name,
+  get_day_out_of_year,
+  get_first_day_of_year,
+  get_number_of_days_in_year,
+} from "../utils/calendar";
+import {
+  use_create_day_drop,
+  use_delete_day_drop,
+} from "../utils/hooks/habitHooks";
 import { HabitWithDayDrops } from "../utils/types";
-
 
 interface IHabitDayDropTooltipProps {
   is_checked: boolean;
@@ -130,11 +140,16 @@ const HabitSquaresDisplay = ({
 }: IHabitSquaresDisplay) => {
   const create_day_drop = use_create_day_drop();
   const delete_day_drop = use_delete_day_drop();
-  
+
   //UI
   let output = [];
   for (let i = 1; i < first_day_of_year; i++) {
-    output.push(<div key={i - first_day_of_year} className="h-[20px] w-[20px] opacity-0"></div>);
+    output.push(
+      <div
+        key={i - first_day_of_year}
+        className="h-[20px] w-[20px] opacity-0"
+      ></div>
+    );
   }
   const day_out_of_year_for_today = get_day_out_of_year(new Date());
   let i = 1;
@@ -165,7 +180,12 @@ const HabitSquaresDisplay = ({
     );
   }
   for (; i <= number_of_days_in_year; i++) {
-    output.push(<div key={i} className="h-[20px] w-[20px] rounded-sm border border-pink-200 md:rounded md:border lg:h-[30px] lg:w-[30px]"></div>);
+    output.push(
+      <div
+        key={i}
+        className="h-[20px] w-[20px] rounded-sm border border-pink-200 md:rounded md:border lg:h-[30px] lg:w-[30px]"
+      ></div>
+    );
   }
   return <>{output}</>;
 };
@@ -178,11 +198,10 @@ export const HabitDisplay = (props: IHabitDisplayProps) => {
   const create_day_drop = use_create_day_drop();
   const delete_day_drop = use_delete_day_drop();
   const [number_of_days_in_year, first_day_of_year] = useMemo(
-    () =>
-      [
-        get_number_of_days_in_year(props.year),
-        get_first_day_of_year(props.year),
-      ],
+    () => [
+      get_number_of_days_in_year(props.year),
+      get_first_day_of_year(props.year),
+    ],
     []
   );
   console.log("HabitDisplay, habit_day_drops", props.habit.habit_day_drops);

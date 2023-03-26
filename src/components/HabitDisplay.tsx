@@ -2,10 +2,12 @@ import { useMemo, useState } from "react";
 import { Modal } from "./Modal";
 import * as RadixModal from "@radix-ui/react-dialog";
 import { api } from "../utils/api";
-import { HabitDayDrop } from "@prisma/client";
 import { HabitWithDayDrops } from "../server/api/routers/habitRouter";
 import * as Tooltip from "@radix-ui/react-tooltip";
 import { Spinner } from "./Spinner";
+import { check_if_marked, determine_whether_today_is_marked, get_day_and_month, get_day_name, get_day_out_of_year, get_first_day_of_year, get_number_of_days_in_year } from "../utils/calendar";
+import { use_create_day_drop, use_delete_day_drop } from "../utils/hooks/habitHooks";
+
 
 interface IHabitDayDropTooltipProps {
   is_checked: boolean;
@@ -40,120 +42,6 @@ function HabitDayDropTooltip({
       </Tooltip.Root>
     </Tooltip.Provider>
   );
-}
-
-function use_create_day_drop() {
-  const api_utils = api.useContext();
-  return api.habit.create_day_drop.useMutation({
-    onMutate: async (variables) => {
-      const { habit_id, year, month, day } = variables;
-      // Cancel outgoing fetches (so they don't overwrite our optimistic update)
-      await api_utils.habit.get_all.cancel();
-
-      // Get the data from the queryCache
-      const prev_data = api_utils.habit.get_all.getData();
-      if (!prev_data) {
-        console.log("'prev_data' is undefined");
-        return { prev_data: [] };
-      }
-      // Optimistically update the data with our new post
-      api_utils.habit.get_all.setData(undefined, (old_habit_data) => {
-        if (!old_habit_data) {
-          console.log("'old_habit_data' is undefined");
-          return [];
-        }
-        const filtered = old_habit_data.filter(
-          (habit) => habit.id === habit_id
-        );
-        if (filtered.length === 0) {
-          throw new Error(
-            "'old_habit_data.filter((habit) => habit.id === habit_id)' is length zero"
-          );
-        }
-        if (filtered.length > 1) {
-          throw new Error(
-            "'old_habit_data.filter((habit) => habit.id === habit_id)' is length greater than one"
-          );
-        }
-        const habit_to_add_drop_to = filtered[0]!;
-        habit_to_add_drop_to.habit_day_drops.push({
-          id: "",
-          habit_id: habit_id,
-          year: year,
-          month: month,
-          day: day,
-        });
-        return old_habit_data;
-      });
-
-      // Return the previous data so we can revert if something goes wrong
-      return { prev_data };
-    },
-    onError: (err, data, ctx) => {
-      console.error(err);
-      api_utils.habit.get_all.setData(undefined, ctx?.prev_data);
-    },
-    onSettled: () => {
-      api_utils.habit.get_all.invalidate();
-    },
-  });
-}
-function use_delete_day_drop() {
-  const api_utils = api.useContext();
-  return api.habit.delete_day_drop.useMutation({
-    async onMutate(variables) {
-      const { habit_id, year, month, day } = variables;
-      // Cancel outgoing fetches (so they don't overwrite our optimistic update)
-      await api_utils.habit.get_all.cancel();
-
-      // Get the data from the queryCache
-      const prev_data = api_utils.habit.get_all.getData();
-      if (!prev_data) {
-        console.log("'prev_data' is undefined");
-        return;
-      }
-      // Optimistically update the data with our new post
-      api_utils.habit.get_all.setData(undefined, (old_habit_data) => {
-        if (!old_habit_data) {
-          console.log("'old_habit_data' is undefined");
-          return [];
-        }
-        const filtered = old_habit_data.filter(
-          (habit) => habit.id === habit_id
-        );
-        if (filtered.length === 0) {
-          throw new Error(
-            "'old_habit_data.filter((habit) => habit.id === habit_id)' is length zero"
-          );
-        }
-        if (filtered.length > 1) {
-          throw new Error(
-            "'old_habit_data.filter((habit) => habit.id === habit_id)' is length greater than one"
-          );
-        }
-        const habit_to_remove_drop_from = filtered[0]!;
-        habit_to_remove_drop_from.habit_day_drops =
-          habit_to_remove_drop_from.habit_day_drops.filter(
-            (day_drop) =>
-              day_drop.year !== year ||
-              day_drop.month !== month ||
-              day_drop.day !== day
-          );
-        return old_habit_data;
-      });
-
-      // Return the previous data so we can revert if something goes wrong
-      return { prev_data };
-    },
-    onError(err, data, ctx) {
-      console.error(err);
-      api_utils.habit.get_all.setData(undefined, ctx?.prev_data);
-    },
-    onSettled() {
-      // api_utils.habit.invalidate();
-      api_utils.habit.get_all.invalidate();
-    },
-  });
 }
 
 interface IDeleteHabitProps {
@@ -228,144 +116,59 @@ const DeleteHabit = ({ id }: IDeleteHabitProps) => {
   );
 };
 
-const day_names = ["Sun", "Mon", "Tues", "Wed", "Thur", "Fri", "Sat"];
-function get_day_name(year: number, month_idx: number, day: number) {
-  return day_names[new Date(year, month_idx, day).getDay()]!;
-}
-
-function get_number_of_days_in_year(year: number) {
-  if (year % 4 !== 0) {
-    return 365;
-  }
-  if (year % 100 !== 0) {
-    return 366;
-  }
-  if (year % 400 !== 0) {
-    return 365;
-  }
-  return 366;
-}
-
-function check_if_checked(
-  day_out_of_year: number,
-  drops: HabitDayDrop[],
-  year: number
-) {
-  let months = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-  if (get_number_of_days_in_year(year) === 366) {
-    months[1] += 1;
-  }
-  let idx = 0;
-  for (; idx < months.length && day_out_of_year > months[idx]!; idx++) {
-    day_out_of_year -= months[idx]!;
-  }
-
-  return (
-    drops.filter(
-      (drop) => drop.month === idx + 1 && drop.day === day_out_of_year
-    ).length > 0
-  );
-}
-
-function get_day_and_month(day_out_of_year: number, year: number) {
-  let months = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-  if (get_number_of_days_in_year(year) === 366) {
-    months[1] += 1;
-  }
-  let idx = 0;
-  for (; idx < months.length && day_out_of_year > months[idx]!; idx++) {
-    day_out_of_year -= months[idx]!;
-  }
-
-  return [idx + 1, day_out_of_year];
-}
-
 interface IHabitSquaresDisplay {
-  number_of_total_squares_including_hidden: number;
+  number_of_days_in_year: number;
   first_day_of_year: number;
   habit: HabitWithDayDrops;
   year: number;
 }
 const HabitSquaresDisplay = ({
-  number_of_total_squares_including_hidden,
+  number_of_days_in_year,
   first_day_of_year,
   habit,
   year,
 }: IHabitSquaresDisplay) => {
   const create_day_drop = use_create_day_drop();
   const delete_day_drop = use_delete_day_drop();
+  
   //UI
   let output = [];
   for (let i = 1; i < first_day_of_year; i++) {
-    output.push(<div className="h-[20px] w-[20px] opacity-0"></div>);
+    output.push(<div key={i - first_day_of_year} className="h-[20px] w-[20px] opacity-0"></div>);
   }
-  for (
-    let i = first_day_of_year;
-    i <= number_of_total_squares_including_hidden;
-    i++
-  ) {
-    const is_checked = check_if_checked(
-      i - first_day_of_year + 1,
-      habit.habit_day_drops,
-      year
-    );
-    const [month, day] = get_day_and_month(i - first_day_of_year + 1, year);
+  const day_out_of_year_for_today = get_day_out_of_year(new Date());
+  let i = 1;
+  for (; i <= day_out_of_year_for_today; i++) {
+    const is_checked = check_if_marked(i, habit.habit_day_drops, year);
+    const [month, day] = get_day_and_month(i, year);
     if (!month || !day) {
-      throw new Error("Eff my life");
+      throw new Error("!month || !day");
     }
-
-    const day_name = get_day_name(year, month - 1, day);
+    const day_name = get_day_name(year, month, day);
     output.push(
       <HabitDayDropTooltip
         key={i}
         is_checked={is_checked}
         on_click={() => {
-          if (is_checked) {
-            delete_day_drop.mutate({
-              habit_id: habit.id,
-              year: year,
-              month: month,
-              day: day,
-            });
-          } else {
-            create_day_drop.mutate({
-              habit_id: habit.id,
-              year: year,
-              month: month,
-              day: day,
-            });
-          }
+          const payload = {
+            habit_id: habit.id,
+            year: year,
+            month: month,
+            day: day,
+          };
+          is_checked
+            ? delete_day_drop.mutate(payload)
+            : create_day_drop.mutate(payload);
         }}
         content={`${day_name} ${month}-${day}`}
       />
     );
   }
-  //I hate this
+  for (; i <= number_of_days_in_year; i++) {
+    output.push(<div key={i} className="h-[20px] w-[20px] rounded-sm border border-pink-200 md:rounded md:border lg:h-[30px] lg:w-[30px]"></div>);
+  }
   return <>{output}</>;
 };
-
-function determine_whether_today_is_marked(habit_day_drops: HabitDayDrop[]) {
-  const today = new Date();
-  const today_day = today.getDate(); //Wtf. Why is it called this
-  const today_month = today.getMonth();
-  const today_year = today.getFullYear();
-
-  return (
-    habit_day_drops.filter((drop) => {
-      return (
-        drop.year === today_year &&
-        drop.month === today_month + 1 &&
-        drop.day === today_day
-      );
-    }).length > 0
-  );
-}
-
-function get_first_day_of_year(year: number) {
-  const january = 0;
-  const first = 1;
-  return new Date(year, january, first).getDay() + 1;
-}
 
 interface IHabitDisplayProps {
   habit: HabitWithDayDrops;
@@ -374,16 +177,20 @@ interface IHabitDisplayProps {
 export const HabitDisplay = (props: IHabitDisplayProps) => {
   const create_day_drop = use_create_day_drop();
   const delete_day_drop = use_delete_day_drop();
-  const [number_of_total_squares_including_hidden, first_day_of_year] =
-    useMemo(() => {
-      const first_day_of_year = get_first_day_of_year(props.year);
-      const number_of_total_squares_including_hidden =
-        get_number_of_days_in_year(props.year) + first_day_of_year - 1;
-      return [number_of_total_squares_including_hidden, first_day_of_year];
-    }, []);
+  const [number_of_days_in_year, first_day_of_year] = useMemo(
+    () =>
+      [
+        get_number_of_days_in_year(props.year),
+        get_first_day_of_year(props.year),
+      ],
+    []
+  );
+  console.log("HabitDisplay, habit_day_drops", props.habit.habit_day_drops);
   const is_today_marked = determine_whether_today_is_marked(
     props.habit.habit_day_drops
   );
+  console.log("is_today_marked", is_today_marked);
+
   return (
     <li key={props.habit.id} className="rounded-lg border bg-white p-2 md:p-4">
       <div className="flex justify-between">
@@ -394,21 +201,15 @@ export const HabitDisplay = (props: IHabitDisplayProps) => {
           className="rounded-full border bg-pink-500 px-4 text-sm font-semibold text-white hover:brightness-110 md:text-base"
           onClick={(e) => {
             e.preventDefault();
-            if (is_today_marked) {
-              delete_day_drop.mutate({
-                habit_id: props.habit.id,
-                year: new Date().getFullYear(),
-                month: new Date().getMonth() + 1,
-                day: new Date().getDate(),
-              });
-            } else {
-              create_day_drop.mutate({
-                habit_id: props.habit.id,
-                year: new Date().getFullYear(),
-                month: new Date().getMonth() + 1,
-                day: new Date().getDate(),
-              });
-            }
+            const payload = {
+              habit_id: props.habit.id,
+              year: new Date().getFullYear(),
+              month: new Date().getMonth() + 1,
+              day: new Date().getDate(),
+            };
+            is_today_marked
+              ? delete_day_drop.mutate(payload)
+              : create_day_drop.mutate(payload);
           }}
         >
           {is_today_marked ? "Unmark today" : "Mark today"}
@@ -428,9 +229,7 @@ export const HabitDisplay = (props: IHabitDisplayProps) => {
         <div className="overflow-x-auto">
           <div className="jason mb-4 gap-[0.15rem] md:gap-[0.2rem] lg:gap-[0.3rem]">
             <HabitSquaresDisplay
-              number_of_total_squares_including_hidden={
-                number_of_total_squares_including_hidden
-              }
+              number_of_days_in_year={number_of_days_in_year}
               first_day_of_year={first_day_of_year}
               habit={props.habit}
               year={props.year}

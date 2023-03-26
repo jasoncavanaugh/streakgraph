@@ -5,6 +5,8 @@ import { api } from "../utils/api";
 import { Modal } from "../components/Modal";
 import { HabitDisplay } from "../components/HabitDisplay";
 import { Spinner } from "../components/Spinner";
+import { HabitWithDayDrops } from "../server/api/routers/habitRouter";
+import { get_years } from "../utils/calendar";
 
 const input_classes = "rounded border border-slate-600 px-2 py-1";
 function AddNewHabitButton() {
@@ -101,6 +103,7 @@ function AddNewHabitButton() {
 }
 const Home: NextPage = () => {
   const all_habits = api.habit.get_all.useQuery();
+  console.log("Home, all_habits", all_habits);
   const [filter_text, set_filter_text] = useState("");
 
   if (all_habits.status === "error") {
@@ -150,7 +153,10 @@ const Home: NextPage = () => {
                 habit_name_lower.includes(filter_text_lower)
               );
             })
-            .map((habit) => <HabitDisplay habit={habit} year={2023} />)}
+            .map((habit) => {
+              const years = get_years(habit);
+              return <HabitDisplay key={habit.id} habit={habit} year={2023} />;
+            })}
       </ul>
       <AddNewHabitButton />
     </div>

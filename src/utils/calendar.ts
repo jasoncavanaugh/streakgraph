@@ -1,5 +1,5 @@
 import { HabitDayDrop } from "@prisma/client";
-import { HabitWithDayDrops } from "../server/api/routers/habitRouter";
+import { HabitWithDayDrops } from "./types";
 
 export function get_day_name(year: number, month: number, day: number) {
   const day_names = ["Sun", "Mon", "Tues", "Wed", "Thur", "Fri", "Sat"];

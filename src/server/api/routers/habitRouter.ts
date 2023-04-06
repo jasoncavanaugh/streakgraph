@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { COLOR_OPTIONS, ColorOption } from "../../../utils/types";
 import { createTRPCRouter, publicProcedure, protectedProcedure } from "../trpc";
 
 //API

@@ -20,12 +20,18 @@ body {
   grid-auto-flow: column;
   grid-auto-columns: min-content;
 }
-.modal-overlay {
-  opacity: 0.4;
-  position: fixed;
-  inset: 0;
-  animation: overlayShow 150ms cubic-bezier(0.16, 1, 0.3, 1);
+
+.maureen {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
+/* .modal-overlay { */
+/*   opacity: 0.4; */
+/*   position: fixed; */
+/*   inset: 0; */
+/*   animation: overlayShow 150ms cubic-bezier(0.16, 1, 0.3, 1); */
+/* } */
 @keyframes overlayShow {
   from {
     opacity: 0;

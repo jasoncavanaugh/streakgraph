@@ -6,26 +6,44 @@ import { Modal } from "../components/Modal";
 import { HabitDisplay } from "../components/HabitDisplay";
 import { Spinner } from "../components/Spinner";
 import { get_years } from "../utils/calendar";
+import { ColorOption, COLOR_OPTIONS } from "../utils/types";
+
+function ColorSelection(props: { on_select_color: (option: ColorOption) => void, selected_color: ColorOption | "" }) {
+  return (
+    <>
+      {COLOR_OPTIONS.map((option) => {
+        return (
+          <div
+            key={option}
+            // className={`${option} h-6 w-6 rounded border-2 border-opacity-0 ${props.selected_color === option ? "brightness-110 border-slate-900" : "border-opacity-0 hover:cursor-pointer hover:border-slate-900 hover:brightness-110" } lg:h-8 lg:w-8`}
+            className={`${option} h-6 w-6 rounded-md border-2 ${props.selected_color === option ? "brightness-110 border-slate-900" : "border-white hover:cursor-pointer hover:border-slate-900 hover:brightness-110" } lg:h-8 lg:w-8`}
+            onClick={() => props.on_select_color(option)}
+          />
+        );
+      })}
+    </>
+  );
+}
 
 const input_classes = "rounded border border-slate-600 px-2 py-1";
-function AddNewHabitButton() {
+function AddNewHabitButtonAndModal() {
   const [name, set_name] = useState("");
-  const [color, set_color] = useState("");
+  const [color, set_color] = useState<ColorOption | "">("");
   const [is_modal_open, set_is_modal_open] = useState(false);
 
   const api_utils = api.useContext();
   const create_habit = api.habit.create.useMutation({
-    onMutate: () => {},
+    onMutate: () => { },
     onSuccess: () => {
       api_utils.habit.get_all.invalidate();
+      set_name("");
+      set_color("");
       set_is_modal_open(false);
     },
   });
 
-  const add_habit_disabled =
-    name.length === 0 ||
-    // color.length === 0 ||
-    create_habit.status === "loading";
+  const add_habit_disabled = name.length === 0 || color.length === 0 || create_habit.status === "loading";
+
   return (
     <Modal
       open={is_modal_open}
@@ -62,30 +80,29 @@ function AddNewHabitButton() {
               autoComplete="off"
               type="text"
             ></input>
-            {/* <label htmlFor="habit-color">Color:</label>
-            <input
-              name="habit-color"
-              onChange={(e) => set_color(e.target.value)}
-              autoComplete="off"
-              className={input_classes}
-              type="text"
-            ></input> */}
+            <p>Color</p>
+            <div className="maureen">
+              <ColorSelection selected_color={color} on_select_color={set_color} />
+            </div>
           </div>
           <div className="h-8" />
           <div className="flex justify-center gap-5">
             <button
               className="rounded-full bg-slate-500 px-3 py-2 text-xs font-semibold text-white hover:brightness-110 lg:px-5 lg:py-3 lg:text-base lg:font-bold"
               type="button"
-              onClick={() => set_is_modal_open(false)}
+              onClick={() => {
+                  set_is_modal_open(false);
+                  set_name(""); 
+                  set_color("");
+                }}
             >
               Cancel
             </button>
             <button
-              className={`rounded-full bg-pink-500 px-3 py-2 text-xs font-semibold text-white lg:px-5 lg:py-3 lg:text-base lg:font-bold ${
-                add_habit_disabled
-                  ? "opacity-50"
-                  : "hover:cursor-pointer hover:brightness-110"
-              }`}
+              className={`rounded-full bg-pink-500 px-3 py-2 text-xs font-semibold text-white lg:px-5 lg:py-3 lg:text-base lg:font-bold ${add_habit_disabled
+                ? "opacity-50"
+                : "hover:cursor-pointer hover:brightness-110"
+                }`}
               type="submit"
               disabled={add_habit_disabled}
             >
@@ -157,7 +174,7 @@ const Home: NextPage = () => {
               return <HabitDisplay key={habit.id} habit={habit} year={2023} />;
             })}
       </ul>
-      <AddNewHabitButton />
+      <AddNewHabitButtonAndModal />
     </div>
   );
 };

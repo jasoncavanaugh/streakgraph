@@ -4,14 +4,21 @@ import { createTRPCRouter, publicProcedure, protectedProcedure } from "../trpc";
 
 //API
 export const habit_router = createTRPCRouter({
-  get_all: publicProcedure.query(async ({ ctx }) => {
-    return await ctx.prisma.habit.findMany({
-      include: {
-        habit_day_drops: true,
-      },
-    });
+  get_all: protectedProcedure.query(async ({ ctx }) => {
+    // ctx.session.user.
+    const accounts = await ctx.prisma.account.findMany({ where: { userId: ctx.session.user.id } });
+
+    return await ctx.prisma.habit.findMany(
+      {
+        where: {
+          user_id: ctx.session.user.id
+        },
+        include: {
+          habit_day_drops: true
+        }
+      });
   }),
-  create: publicProcedure
+  create: protectedProcedure
     .input(z.object({ name: z.string(), color: z.enum(COLOR_OPTIONS) }))
     .mutation(async ({ ctx, input }) => {
       await ctx.prisma.habit.create({
@@ -19,15 +26,24 @@ export const habit_router = createTRPCRouter({
           name: input.name,
           color: input.color,
           streak: 0,
+          user_id: ctx.session.user.id
         },
       });
     }),
-  delete: publicProcedure
+  // { user_id: ctx.session.user.id }
+  delete: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      await ctx.prisma.habit.delete({ where: { id: input.id } });
+      await ctx.prisma.habit.deleteMany({
+        where: {
+          AND: [
+            { id: input.id },
+            { user_id: ctx.session.user.id }
+          ]
+        }
+      });
     }),
-  create_day_drop: publicProcedure
+  create_day_drop: protectedProcedure
     .input(
       z.object({
         habit_id: z.string(),
@@ -60,12 +76,4 @@ export const habit_router = createTRPCRouter({
         },
       });
     }),
-
-  // getAll: publicProcedure.query(({ ctx }) => {
-  //   return ctx.prisma.example.findMany();
-  // }),
-
-  // getSecretMessage: protectedProcedure.query(() => {
-  //   return "you can now see this secret message!";
-  // }),
 });

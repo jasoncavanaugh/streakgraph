@@ -62,7 +62,6 @@ export function determine_whether_today_is_marked(
   const today_day = today.getDate(); //Wtf. Why is it called this
   const today_month = today.getMonth() + 1;
   const today_year = today.getFullYear();
-  console.log("habit_day_drops", habit_day_drops);
   return (
     habit_day_drops.filter(
       (drop) =>

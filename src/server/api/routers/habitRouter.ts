@@ -12,7 +12,7 @@ export const habit_router = createTRPCRouter({
     });
   }),
   create: publicProcedure
-    .input(z.object({ name: z.string(), color: z.string() }))
+    .input(z.object({ name: z.string(), color: z.enum(COLOR_OPTIONS) }))
     .mutation(async ({ ctx, input }) => {
       await ctx.prisma.habit.create({
         data: {

@@ -8,15 +8,21 @@ import { Spinner } from "../components/Spinner";
 import { get_years } from "../utils/calendar";
 import { ColorOption, COLOR_OPTIONS } from "../utils/types";
 
-function ColorSelection(props: { on_select_color: (option: ColorOption) => void, selected_color: ColorOption | "" }) {
+function ColorSelection(props: {
+  on_select_color: (option: ColorOption) => void;
+  selected_color: ColorOption | "";
+}) {
   return (
     <>
       {COLOR_OPTIONS.map((option) => {
         return (
           <div
             key={option}
-            // className={`${option} h-6 w-6 rounded border-2 border-opacity-0 ${props.selected_color === option ? "brightness-110 border-slate-900" : "border-opacity-0 hover:cursor-pointer hover:border-slate-900 hover:brightness-110" } lg:h-8 lg:w-8`}
-            className={`${option} h-6 w-6 rounded-md border-2 ${props.selected_color === option ? "brightness-110 border-slate-900" : "border-white hover:cursor-pointer hover:border-slate-900 hover:brightness-110" } lg:h-8 lg:w-8`}
+            className={`bg-${option} h-6 w-6 rounded-md border-2 ${
+              props.selected_color === option
+                ? "border-slate-900 brightness-110"
+                : "border-white hover:cursor-pointer hover:border-slate-900 hover:brightness-110"
+            } lg:h-8 lg:w-8`}
             onClick={() => props.on_select_color(option)}
           />
         );
@@ -33,7 +39,6 @@ function AddNewHabitButtonAndModal() {
 
   const api_utils = api.useContext();
   const create_habit = api.habit.create.useMutation({
-    onMutate: () => { },
     onSuccess: () => {
       api_utils.habit.get_all.invalidate();
       set_name("");
@@ -42,7 +47,10 @@ function AddNewHabitButtonAndModal() {
     },
   });
 
-  const add_habit_disabled = name.length === 0 || color.length === 0 || create_habit.status === "loading";
+  const add_habit_disabled =
+    name.length === 0 ||
+    color.length === 0 ||
+    create_habit.status === "loading";
 
   return (
     <Modal
@@ -61,7 +69,7 @@ function AddNewHabitButtonAndModal() {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            if (name.length === 0) {
+            if (name.length === 0 || color === "") {
               return;
             }
             create_habit.mutate({ name, color });
@@ -82,7 +90,10 @@ function AddNewHabitButtonAndModal() {
             ></input>
             <p>Color</p>
             <div className="maureen">
-              <ColorSelection selected_color={color} on_select_color={set_color} />
+              <ColorSelection
+                selected_color={color}
+                on_select_color={set_color}
+              />
             </div>
           </div>
           <div className="h-8" />
@@ -91,18 +102,19 @@ function AddNewHabitButtonAndModal() {
               className="rounded-full bg-slate-500 px-3 py-2 text-xs font-semibold text-white hover:brightness-110 lg:px-5 lg:py-3 lg:text-base lg:font-bold"
               type="button"
               onClick={() => {
-                  set_is_modal_open(false);
-                  set_name(""); 
-                  set_color("");
-                }}
+                set_is_modal_open(false);
+                set_name("");
+                set_color("");
+              }}
             >
               Cancel
             </button>
             <button
-              className={`rounded-full bg-pink-500 px-3 py-2 text-xs font-semibold text-white lg:px-5 lg:py-3 lg:text-base lg:font-bold ${add_habit_disabled
-                ? "opacity-50"
-                : "hover:cursor-pointer hover:brightness-110"
-                }`}
+              className={`rounded-full bg-pink-500 px-3 py-2 text-xs font-semibold text-white lg:px-5 lg:py-3 lg:text-base lg:font-bold ${
+                add_habit_disabled
+                  ? "opacity-50"
+                  : "hover:cursor-pointer hover:brightness-110"
+              }`}
               type="submit"
               disabled={add_habit_disabled}
             >
@@ -171,7 +183,7 @@ const Home: NextPage = () => {
             })
             .map((habit) => {
               const years = get_years(habit);
-              return <HabitDisplay key={habit.id} habit={habit} year={2023} />;
+              return <HabitDisplay color={habit.color as ColorOption} key={habit.id} habit={habit} year={2023} />;
             })}
       </ul>
       <AddNewHabitButtonAndModal />

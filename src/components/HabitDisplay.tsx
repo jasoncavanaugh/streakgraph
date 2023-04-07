@@ -17,25 +17,27 @@ import {
   use_create_day_drop,
   use_delete_day_drop,
 } from "../utils/hooks/habitHooks";
-import { HabitWithDayDrops } from "../utils/types";
+import { ColorOption, HabitWithDayDrops } from "../utils/types";
 
 interface IHabitDayDropTooltipProps {
   is_checked: boolean;
   on_click: () => void;
   content: string;
+  color: ColorOption;
 }
 function HabitDayDropTooltip({
   is_checked,
   on_click,
   content,
+  color
 }: IHabitDayDropTooltipProps) {
   return (
     <Tooltip.Provider delayDuration={100} skipDelayDuration={0}>
       <Tooltip.Root>
         <Tooltip.Trigger asChild>
           <div
-            className={`h-[20px] w-[20px] rounded-sm border border-pink-500 hover:cursor-pointer hover:brightness-110 md:rounded md:border lg:h-[30px] lg:w-[30px] ${
-              is_checked ? "bg-pink-500" : ""
+            className={`h-[20px] w-[20px] rounded-sm border border-${color} hover:cursor-pointer hover:brightness-110 md:rounded md:border lg:h-[30px] lg:w-[30px] ${
+              is_checked ? "bg-" + color : ""
             }`}
             onClick={on_click}
           />
@@ -131,12 +133,14 @@ interface IHabitSquaresDisplay {
   first_day_of_year: number;
   habit: HabitWithDayDrops;
   year: number;
+  color: ColorOption;
 }
 const HabitSquaresDisplay = ({
   number_of_days_in_year,
   first_day_of_year,
   habit,
   year,
+  color
 }: IHabitSquaresDisplay) => {
   const create_day_drop = use_create_day_drop();
   const delete_day_drop = use_delete_day_drop();
@@ -163,6 +167,7 @@ const HabitSquaresDisplay = ({
     output.push(
       <HabitDayDropTooltip
         key={i}
+        color={color}
         is_checked={is_checked}
         on_click={() => {
           const payload = {
@@ -183,7 +188,7 @@ const HabitSquaresDisplay = ({
     output.push(
       <div
         key={i}
-        className="h-[20px] w-[20px] rounded-sm border border-pink-200 md:rounded md:border lg:h-[30px] lg:w-[30px]"
+        className={`h-[20px] w-[20px] rounded-sm border border-${color} opacity-30 md:rounded md:border lg:h-[30px] lg:w-[30px]`}
       ></div>
     );
   }
@@ -193,6 +198,7 @@ const HabitSquaresDisplay = ({
 interface IHabitDisplayProps {
   habit: HabitWithDayDrops;
   year: number;
+  color: ColorOption;
 }
 export const HabitDisplay = (props: IHabitDisplayProps) => {
   const create_day_drop = use_create_day_drop();
@@ -248,6 +254,7 @@ export const HabitDisplay = (props: IHabitDisplayProps) => {
         <div className="overflow-x-auto">
           <div className="jason mb-4 gap-[0.15rem] md:gap-[0.2rem] lg:gap-[0.3rem]">
             <HabitSquaresDisplay
+              color={props.color}
               number_of_days_in_year={number_of_days_in_year}
               first_day_of_year={first_day_of_year}
               habit={props.habit}

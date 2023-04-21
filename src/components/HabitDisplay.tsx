@@ -81,7 +81,7 @@ const DeleteHabit = ({ id }: IDeleteHabitProps) => {
       trigger={
         <button
           type="button"
-          className="rounded-full bg-red-500 py-2 px-4 text-sm font-semibold text-white hover:brightness-110 md:py-2 md:px-4 md:text-base"
+          className="rounded-full bg-red-500 py-1 px-3 text-sm font-semibold text-white hover:brightness-110 lg:py-2 lg:px-4 lg:text-base"
           onClick={() => set_is_modal_open(true)}
         >
           Remove

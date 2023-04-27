@@ -156,7 +156,7 @@ function AddNewHabitButtonAndModal() {
           </RadixModal.Title>
           <div className="h-1 lg:h-4" />
           <div className="flex w-full flex-col gap-4">
-            <label htmlFor="habit-name">Name:</label>
+            <label htmlFor="habit-name">Name</label>
             <input
               name="habit-name"
               onChange={(e) => set_name(e.target.value)}

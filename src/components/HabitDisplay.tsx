@@ -79,7 +79,7 @@ export const HabitDisplay = (props: IHabitDisplayProps) => {
         </div>
       </div>
       <div className="h-2 md:h-4" />
-      <div className="flex justify-between border">
+      <div className="flex justify-between">
         <DeleteHabit id={props.habit.id} />
         <StreakDisplay habit={props.habit} year={props.year} />
       </div>

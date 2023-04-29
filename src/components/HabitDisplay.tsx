@@ -79,12 +79,77 @@ export const HabitDisplay = (props: IHabitDisplayProps) => {
         </div>
       </div>
       <div className="h-2 md:h-4" />
-      <DeleteHabit id={props.habit.id} />
+      <div className="flex justify-between border">
+        <DeleteHabit id={props.habit.id} />
+        <StreakDisplay habit={props.habit} year={props.year} />
+      </div>
     </li>
   );
 };
 
 export default HabitDisplay;
+
+function get_colors_based_on_streak_size(streak_size: number) {
+  // opacity-0	opacity: 0;
+  // opacity-5	opacity: 0.05;
+  // opacity-10	opacity: 0.1;
+  // opacity-20	opacity: 0.2;
+  // opacity-25	opacity: 0.25;
+  // opacity-30	opacity: 0.3;
+  // opacity-40	opacity: 0.4;
+  // opacity-50	opacity: 0.5;
+  // opacity-60	opacity: 0.6;
+  // opacity-70	opacity: 0.7;
+  // opacity-75	opacity: 0.75;
+  // opacity-80	opacity: 0.8;
+  // opacity-90	opacity: 0.9;
+  // opacity-95	opacity: 0.95;
+  // opacity-100	opacity: 1;
+  if (streak_size < 1) {// Increase the distance by 1 for each level
+    return "opacity-30";
+  } else if (streak_size < 2) {
+    return "opacity-40";
+  } else if (streak_size < 4) {
+    return "opacity-50";
+  } else if (streak_size < 7) {
+    return "opacity-60";
+  } else if (streak_size < 11) {
+    return "opacity-70";
+  } else if (streak_size < 16) {
+    return "opacity-75";
+  } else if (streak_size < 22) {
+    return "opacity-80";
+  } else if (streak_size < 29) {
+    return "opacity-90";
+  } else if (streak_size < 37) {
+    return "opacity-95";
+  } else {
+    return "opacity-100";
+  }
+}
+
+function StreakDisplay(
+  { habit, year }: {
+    habit: HabitWithDayDrops;
+    year: number;
+  }
+) {
+  const day_out_of_year_for_today = get_day_out_of_year(new Date());
+  let cur_streak = 0;
+  for (let i = day_out_of_year_for_today; i >= 1; i--) {
+    const is_checked = check_if_marked(i, habit.habit_day_drops, year);
+    if (is_checked) {
+      cur_streak++;
+    } else {
+      break;
+    }
+  }
+  return (
+    <div className={"flex min-w-[1.8rem] md:min-w-[3rem] brightness-110 items-center justify-center rounded-full border-2 border-violet-500 text-violet-500 font-bold px-1 py-0.5 text-sm md:border-4 md:px-2 md:py-1 md:text-2xl " + get_colors_based_on_streak_size(cur_streak)}>
+      {cur_streak}
+    </div>
+  );
+}
 
 interface IHabitSquaresDisplay {
   habit: HabitWithDayDrops;
@@ -245,7 +310,6 @@ const DeleteHabit = ({ id }: IDeleteHabitProps) => {
             >
               Cancel
             </button>
-
             <button
               className="rounded-full bg-red-500 px-5 py-3 text-xs font-semibold text-white outline-none hover:brightness-110 lg:text-base lg:font-bold"
               type="submit"

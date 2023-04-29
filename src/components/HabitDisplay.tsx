@@ -39,27 +39,23 @@ export const HabitDisplay = (props: IHabitDisplayProps) => {
         <h1 className="flex justify-start text-xl font-semibold text-slate-700 md:text-2xl lg:text-3xl">
           {props.habit.name}
         </h1>
-        <div className="flex border border-red-500">
-          <div>
-          </div>
-          <button
-            className="rounded-full border bg-pink-500 px-4 text-sm font-semibold text-white hover:brightness-110 md:text-base"
-            onClick={(e) => {
-              e.preventDefault();
-              const payload = {
-                habit_id: props.habit.id,
-                year: new Date().getFullYear(),
-                month: new Date().getMonth() + 1,
-                day: new Date().getDate(),
-              };
-              is_today_marked
-                ? delete_day_drop.mutate(payload)
-                : create_day_drop.mutate(payload);
-            }}
-          >
-            {is_today_marked ? "Unmark today" : "Mark today"}
-          </button>
-        </div>
+        <button
+          className="rounded-full border bg-pink-500 px-4 text-sm font-semibold text-white hover:brightness-110 md:text-base"
+          onClick={(e) => {
+            e.preventDefault();
+            const payload = {
+              habit_id: props.habit.id,
+              year: new Date().getFullYear(),
+              month: new Date().getMonth() + 1,
+              day: new Date().getDate(),
+            };
+            is_today_marked
+              ? delete_day_drop.mutate(payload)
+              : create_day_drop.mutate(payload);
+          }}
+        >
+          {is_today_marked ? "Unmark today" : "Mark today"}
+        </button>
       </div>
       <div className="h-2 md:h-4" />
       <div className="flex gap-0">

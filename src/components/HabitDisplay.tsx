@@ -136,13 +136,16 @@ function StreakDisplay(
 ) {
   const day_out_of_year_for_today = get_day_out_of_year(new Date());
   let cur_streak = 0;
-  for (let i = day_out_of_year_for_today; i >= 1; i--) {
+  for (let i = day_out_of_year_for_today - 1; i >= 1; i--) {
     const is_checked = check_if_marked(i, habit.habit_day_drops, year);
     if (is_checked) {
       cur_streak++;
     } else {
       break;
     }
+  }
+  if (check_if_marked(day_out_of_year_for_today, habit.habit_day_drops, year)) {
+    cur_streak++;
   }
   return (
     <div className={"flex min-w-[1.8rem] md:min-w-[3rem] brightness-110 items-center justify-center rounded-full border-2 border-violet-500 text-violet-500 font-bold px-1 py-0.5 text-sm md:border-4 md:px-2 md:py-1 md:text-2xl " + get_colors_based_on_streak_size(cur_streak)}>

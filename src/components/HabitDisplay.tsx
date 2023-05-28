@@ -54,7 +54,7 @@ export const HabitDisplay = (props: IHabitDisplayProps) => {
               : create_day_drop.mutate(payload);
           }}
         >
-          {is_today_marked ? "Unmark today" : "Mark today"}
+          {is_today_marked ? "Unmark" : "Mark"}
         </button>
       </div>
       <div className="h-2 md:h-4" />

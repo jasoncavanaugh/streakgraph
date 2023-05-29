@@ -11,16 +11,12 @@ import { signIn, signOut, useSession } from "next-auth/react";
 
 const Home: NextPage = () => {
   const all_habits = api.habit.get_all.useQuery();
-  console.log("Home, all_habits", all_habits);
   const [filter_text, set_filter_text] = useState("");
 
   if (all_habits.status === "error") {
     console.error(all_habits.error);
   }
   const session = useSession();
-
-  // session.status === "
-
 
   if (session.status === "loading") {
     // if (true) {
@@ -34,19 +30,19 @@ const Home: NextPage = () => {
   if (session.status === "unauthenticated") {
     return (
       <div className="flex h-[95vh] items-center justify-center p-1 md:p-4">
-          <button
-            className="rounded-full bg-pink-500 px-6 py-2 text-3xl font-semibold text-white shadow-sm shadow-pink-500 hover:brightness-110"
-            onClick={() => void signIn()}
-          >
-            Sign In
-          </button>
+        <button
+          className="rounded-full bg-pink-500 px-6 py-2 text-3xl font-semibold text-white shadow-sm shadow-pink-500 hover:brightness-110"
+          onClick={() => void signIn()}
+        >
+          Sign In
+        </button>
       </div>
     );
   }
 
   return (
     <div className="p-1 md:p-4">
-      <div className="flex flex-col flex-col-reverse items-end justify-between gap-2 px-1 pt-2  md:flex-row md:pt-0">
+      <div className="flex flex-col-reverse items-end justify-between gap-2 px-1 pt-2  md:flex-row md:pt-0">
         <input
           autoComplete="off"
           className="w-full rounded-full px-3 py-1 outline-0 md:w-1/3"
@@ -57,7 +53,7 @@ const Home: NextPage = () => {
         ></input>
         <button
           className="rounded-full bg-pink-500 px-3 py-1 text-sm font-semibold text-white shadow-sm shadow-pink-500 hover:brightness-110 md:px-5 md:text-lg"
-        onClick={() => void signOut()}
+          onClick={() => void signOut()}
         >
           Log Out
         </button>
@@ -97,16 +93,22 @@ const Home: NextPage = () => {
             })
             .map((habit) => {
               const years = get_years(habit);
-              return <HabitDisplay color={habit.color as ColorOption} key={habit.id} habit={habit} year={2023} />;
+              return (
+                <HabitDisplay
+                  color={habit.color as ColorOption}
+                  key={habit.id}
+                  habit={habit}
+                  year={2023}
+                />
+              );
             })}
       </ul>
       <AddNewHabitButtonAndModal />
-    </div >
+    </div>
   );
 };
 
 export default Home;
-
 
 function AddNewHabitButtonAndModal() {
   const [name, set_name] = useState("");
@@ -140,68 +142,68 @@ function AddNewHabitButtonAndModal() {
           +
         </button>
       }
-      modal_frame_classNames="top-1/3 left-1/2 flex w-[30rem] -translate-x-1/2 -translate-y-1/2 flex-col border-t-8 border-t-pink-500 px-5 py-3 lg:top-1/2 lg:top-1/2 lg:px-8 lg:py-6"
-      content={
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (name.length === 0 || color === "") {
-              return;
-            }
-            create_habit.mutate({ name, color });
-          }}
-        >
-          <RadixModal.Title className="whitespace-nowrap text-3xl font-bold text-slate-700">
-            Create New Habit
-          </RadixModal.Title>
-          <div className="h-1 lg:h-4" />
-          <div className="flex w-full flex-col gap-4">
-            <label htmlFor="habit-name">Name</label>
-            <input
-              name="habit-name"
-              onChange={(e) => set_name(e.target.value)}
-              className="rounded border border-slate-600 px-2 py-1"
-              autoComplete="off"
-              type="text"
-            ></input>
-            <p>Color</p>
-            <div className="maureen">
-              <ColorSelection
-                selected_color={color}
-                on_select_color={set_color}
-              />
-            </div>
+      className="top-1/3 left-1/2 flex w-[30rem] -translate-x-1/2 -translate-y-1/2 flex-col border-t-8 border-t-pink-500 px-5 py-3 lg:top-1/2 lg:top-1/2 lg:px-8 lg:py-6"
+    >
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (name.length === 0 || color === "") {
+            return;
+          }
+          create_habit.mutate({ name, color });
+        }}
+      >
+        <RadixModal.Title className="whitespace-nowrap text-3xl font-bold text-slate-700">
+          Create New Habit
+        </RadixModal.Title>
+        <div className="h-1 lg:h-4" />
+        <div className="flex w-full flex-col gap-4">
+          <label htmlFor="habit-name">Name</label>
+          <input
+            name="habit-name"
+            onChange={(e) => set_name(e.target.value)}
+            className="rounded border border-slate-600 px-2 py-1"
+            autoComplete="off"
+            type="text"
+          ></input>
+          <p>Color</p>
+          <div className="maureen">
+            <ColorSelection
+              selected_color={color}
+              on_select_color={set_color}
+            />
           </div>
-          <div className="h-8" />
-          <div className="flex justify-center gap-5">
-            <button
-              className="rounded-full bg-slate-500 px-3 py-2 text-xs font-semibold text-white hover:brightness-110 lg:px-5 lg:py-3 lg:text-base lg:font-bold"
-              type="button"
-              onClick={() => {
-                set_is_modal_open(false);
-                set_name("");
-                set_color("");
-              }}
-            >
-              Cancel
-            </button>
-            <button
-              className={`rounded-full bg-pink-500 px-3 py-2 text-xs font-semibold text-white lg:px-5 lg:py-3 lg:text-base lg:font-bold ${add_habit_disabled
+        </div>
+        <div className="h-8" />
+        <div className="flex justify-center gap-5">
+          <button
+            className="rounded-full bg-slate-500 px-3 py-2 text-xs font-semibold text-white hover:brightness-110 lg:px-5 lg:py-3 lg:text-base lg:font-bold"
+            type="button"
+            onClick={() => {
+              set_is_modal_open(false);
+              set_name("");
+              set_color("");
+            }}
+          >
+            Cancel
+          </button>
+          <button
+            className={`rounded-full bg-pink-500 px-3 py-2 text-xs font-semibold text-white lg:px-5 lg:py-3 lg:text-base lg:font-bold ${
+              add_habit_disabled
                 ? "opacity-50"
                 : "hover:cursor-pointer hover:brightness-110"
-                }`}
-              type="submit"
-              disabled={add_habit_disabled}
-            >
-              {create_habit.status === "loading" && (
-                <Spinner className="mx-[2.1rem] h-4 w-4 border-2 border-solid border-white lg:mx-[3.1rem] lg:my-1" />
-              )}
-              {create_habit.status !== "loading" && "Create Habit"}
-            </button>
-          </div>
-        </form>
-      }
-    />
+            }`}
+            type="submit"
+            disabled={add_habit_disabled}
+          >
+            {create_habit.status === "loading" && (
+              <Spinner className="mx-[2.1rem] h-4 w-4 border-2 border-solid border-white lg:mx-[3.1rem] lg:my-1" />
+            )}
+            {create_habit.status !== "loading" && "Create Habit"}
+          </button>
+        </div>
+      </form>
+    </Modal>
   );
 }
 
@@ -215,10 +217,11 @@ function ColorSelection(props: {
         return (
           <div
             key={option}
-            className={`bg-${option} h-6 w-6 rounded-md border-2 ${props.selected_color === option
-              ? "border-slate-900 brightness-110"
-              : "border-white hover:cursor-pointer hover:border-slate-900 hover:brightness-110"
-              } lg:h-8 lg:w-8`}
+            className={`bg-${option} h-6 w-6 rounded-md border-2 ${
+              props.selected_color === option
+                ? "border-slate-900 brightness-110"
+                : "border-white hover:cursor-pointer hover:border-slate-900 hover:brightness-110"
+            } lg:h-8 lg:w-8`}
             onClick={() => props.on_select_color(option)}
           />
         );

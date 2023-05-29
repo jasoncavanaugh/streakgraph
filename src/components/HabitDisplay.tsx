@@ -105,7 +105,8 @@ function get_colors_based_on_streak_size(streak_size: number) {
   // opacity-90	opacity: 0.9;
   // opacity-95	opacity: 0.95;
   // opacity-100	opacity: 1;
-  if (streak_size < 1) {// Increase the distance by 1 for each level
+  if (streak_size < 1) {
+    // Increase the distance by 1 for each level
     return "opacity-30";
   } else if (streak_size < 2) {
     return "opacity-40";
@@ -128,12 +129,13 @@ function get_colors_based_on_streak_size(streak_size: number) {
   }
 }
 
-function StreakDisplay(
-  { habit, year }: {
-    habit: HabitWithDayDrops;
-    year: number;
-  }
-) {
+function StreakDisplay({
+  habit,
+  year,
+}: {
+  habit: HabitWithDayDrops;
+  year: number;
+}) {
   const day_out_of_year_for_today = get_day_out_of_year(new Date());
   let cur_streak = 0;
   for (let i = day_out_of_year_for_today - 1; i >= 1; i--) {
@@ -148,7 +150,12 @@ function StreakDisplay(
     cur_streak++;
   }
   return (
-    <div className={"flex min-w-[1.8rem] md:min-w-[3rem] brightness-110 items-center justify-center rounded-full border-2 border-violet-500 text-violet-500 font-bold px-1 py-0.5 text-sm md:border-4 md:px-2 md:py-1 md:text-2xl " + get_colors_based_on_streak_size(cur_streak)}>
+    <div
+      className={
+        "flex min-w-[1.8rem] items-center justify-center rounded-full border-2 border-violet-500 px-1 py-0.5 text-sm font-bold text-violet-500 brightness-110 md:min-w-[3rem] md:border-4 md:px-2 md:py-1 md:text-2xl " +
+        get_colors_based_on_streak_size(cur_streak)
+      }
+    >
       {cur_streak}
     </div>
   );
@@ -159,18 +166,11 @@ interface IHabitSquaresDisplay {
   year: number;
   color: ColorOption;
 }
-const HabitSquaresDisplay = ({
-  habit,
-  year,
-  color
-}: IHabitSquaresDisplay) => {
+const HabitSquaresDisplay = ({ habit, year, color }: IHabitSquaresDisplay) => {
   const create_day_drop = use_create_day_drop();
   const delete_day_drop = use_delete_day_drop();
   const [number_of_days_in_year, first_day_of_year] = useMemo(
-    () => [
-      get_number_of_days_in_year(year),
-      get_first_day_of_year(year),
-    ],
+    () => [get_number_of_days_in_year(year), get_first_day_of_year(year)],
     []
   );
 
@@ -233,15 +233,16 @@ function HabitDayDropTooltip({
   is_checked,
   on_click,
   content,
-  color
+  color,
 }: IHabitDayDropTooltipProps) {
   return (
     <Tooltip.Provider delayDuration={100} skipDelayDuration={0}>
       <Tooltip.Root>
         <Tooltip.Trigger asChild>
           <div
-            className={`h-[20px] w-[20px] rounded-sm border border-${color} hover:cursor-pointer hover:brightness-110 md:rounded md:border lg:h-[30px] lg:w-[30px] ${is_checked ? "bg-" + color : ""
-              }`}
+            className={`h-[20px] w-[20px] rounded-sm border border-${color} hover:cursor-pointer hover:brightness-110 md:rounded md:border lg:h-[30px] lg:w-[30px] ${
+              is_checked ? "bg-" + color : ""
+            }`}
             onClick={on_click}
           />
         </Tooltip.Trigger>
@@ -269,7 +270,6 @@ const DeleteHabit = ({ id }: IDeleteHabitProps) => {
   const delete_habit = api.habit.delete.useMutation({
     onSuccess: () => {
       api_utils.habit.get_all.invalidate();
-      // set_loading(false);
       set_is_modal_open(false); //TODO: Have to figure out how to close the modal once the new data comes in
     },
     onError: () => {
@@ -289,44 +289,41 @@ const DeleteHabit = ({ id }: IDeleteHabitProps) => {
           Remove
         </button>
       }
-      modal_frame_classNames="left-1/2 top-1/2 flex w-[20rem] -translate-x-1/2 -translate-y-1/2 flex-col border-t-8 border-t-red-500 px-5 py-3 lg:top-1/2 lg:w-[30rem] lg:px-8 lg:py-6"
-      content={
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            delete_habit.mutate({ id });
-          }}
-        >
-          <RadixModal.Title className="whitespace-nowrap text-3xl font-bold text-slate-700">
-            Delete Habit
-          </RadixModal.Title>
-          <div className="h-1 lg:h-4" />
-          <div className="flex w-full flex-col gap-4">
-            Are you sure you wish to delete this habit?
-          </div>
-          <div className="h-8" />
-          <div className="flex justify-center gap-5">
-            <button
-              className="rounded-full bg-slate-500 px-5 py-3 text-xs font-semibold text-white outline-none hover:brightness-110 lg:text-base lg:font-bold"
-              type="button"
-              onClick={() => set_is_modal_open(false)}
-            >
-              Cancel
-            </button>
-            <button
-              className="rounded-full bg-red-500 px-5 py-3 text-xs font-semibold text-white outline-none hover:brightness-110 lg:text-base lg:font-bold"
-              type="submit"
-            >
-              {delete_habit.status === "loading" && (
-                <Spinner className="h-4 w-4 border-2 border-solid border-white lg:mx-[1.33rem] lg:my-1" />
-              )}
-              {delete_habit.status !== "loading" && "Delete"}
-            </button>
-          </div>
-        </form>
-      }
-    />
+      className="left-1/2 top-1/2 flex w-[20rem] -translate-x-1/2 -translate-y-1/2 flex-col border-t-8 border-t-red-500 px-5 py-3 lg:top-1/2 lg:w-[30rem] lg:px-8 lg:py-6"
+    >
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          delete_habit.mutate({ id });
+        }}
+      >
+        <RadixModal.Title className="whitespace-nowrap text-3xl font-bold text-slate-700">
+          Delete Habit
+        </RadixModal.Title>
+        <div className="h-1 lg:h-4" />
+        <div className="flex w-full flex-col gap-4">
+          Are you sure you wish to delete this habit?
+        </div>
+        <div className="h-8" />
+        <div className="flex justify-center gap-5">
+          <button
+            className="rounded-full bg-slate-500 px-5 py-3 text-xs font-semibold text-white outline-none hover:brightness-110 lg:text-base lg:font-bold"
+            type="button"
+            onClick={() => set_is_modal_open(false)}
+          >
+            Cancel
+          </button>
+          <button
+            className="rounded-full bg-red-500 px-5 py-3 text-xs font-semibold text-white outline-none hover:brightness-110 lg:text-base lg:font-bold"
+            type="submit"
+          >
+            {delete_habit.status === "loading" && (
+              <Spinner className="h-4 w-4 border-2 border-solid border-white lg:mx-[1.33rem] lg:my-1" />
+            )}
+            {delete_habit.status !== "loading" && "Delete"}
+          </button>
+        </div>
+      </form>
+    </Modal>
   );
 };
-
-

@@ -17,7 +17,11 @@ import {
   use_create_day_drop,
   use_delete_day_drop,
 } from "../utils/hooks/habitHooks";
-import { ColorOption, HabitWithDayDrops } from "../utils/types";
+import {
+  ColorOption,
+  COLOR_TO_CLASSNAME,
+  HabitWithDayDrops,
+} from "../utils/types";
 
 interface IHabitDisplayProps {
   habit: HabitWithDayDrops;
@@ -217,7 +221,7 @@ const HabitSquaresDisplay = ({ habit, year, color }: IHabitSquaresDisplay) => {
     output.push(
       <div
         key={i}
-        className={`h-[20px] w-[20px] rounded-sm border border-${color} opacity-30 md:rounded md:border lg:h-[30px] lg:w-[30px]`}
+        className={`h-[20px] w-[20px] rounded-sm border ${COLOR_TO_CLASSNAME[color]["border"]} opacity-30 md:rounded md:border lg:h-[30px] lg:w-[30px]`}
       ></div>
     );
   }
@@ -240,8 +244,10 @@ function HabitDayDropTooltip({
       <Tooltip.Root>
         <Tooltip.Trigger asChild>
           <div
-            className={`h-[20px] w-[20px] rounded-sm border border-${color} hover:cursor-pointer hover:brightness-110 md:rounded md:border lg:h-[30px] lg:w-[30px] ${
-              is_checked ? "bg-" + color : ""
+            className={`h-[20px] w-[20px] rounded-sm border ${
+              COLOR_TO_CLASSNAME[color]["border"]
+            } hover:cursor-pointer hover:brightness-110 md:rounded md:border lg:h-[30px] lg:w-[30px] ${
+              is_checked ? COLOR_TO_CLASSNAME[color]["bg"] : ""
             }`}
             onClick={on_click}
           />

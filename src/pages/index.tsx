@@ -6,7 +6,7 @@ import { Modal } from "../components/Modal";
 import { HabitDisplay } from "../components/HabitDisplay";
 import { Spinner } from "../components/Spinner";
 import { get_years } from "../utils/calendar";
-import { ColorOption, COLOR_OPTIONS } from "../utils/types";
+import { ColorOption, COLOR_OPTIONS, COLOR_TO_CLASSNAME } from "../utils/types";
 import { signIn, signOut, useSession } from "next-auth/react";
 
 const Home: NextPage = () => {
@@ -217,7 +217,9 @@ function ColorSelection(props: {
         return (
           <div
             key={option}
-            className={`bg-${option} h-6 w-6 rounded-md border-2 ${
+            className={`${
+              COLOR_TO_CLASSNAME[option]["bg"]
+            } h-6 w-6 rounded-md border-2 ${
               props.selected_color === option
                 ? "border-slate-900 brightness-110"
                 : "border-white hover:cursor-pointer hover:border-slate-900 hover:brightness-110"

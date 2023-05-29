@@ -136,7 +136,7 @@ function AddNewHabitButtonAndModal() {
       trigger={
         <button
           type="button"
-          className="fixed bottom-5 right-5 h-14 w-14 rounded-full bg-pink-600 text-3xl font-bold text-white md:bottom-16 md:right-16 lg:shadow-md lg:shadow-pink-500 lg:transition-all lg:hover:-translate-y-1 lg:hover:shadow-lg lg:hover:shadow-pink-500 lg:hover:brightness-110"
+          className="fixed bottom-5 right-5 h-14 w-14 rounded-full bg-pink-600 text-3xl font-bold text-white hover:brightness-110 md:bottom-16 md:right-16 lg:shadow-md lg:shadow-pink-500 lg:transition-all lg:hover:-translate-y-1 lg:hover:shadow-lg lg:hover:shadow-pink-500"
           onClick={() => set_is_modal_open(true)}
         >
           +

@@ -44,7 +44,7 @@ export const HabitDisplay = (props: IHabitDisplayProps) => {
           {props.habit.name}
         </h1>
         <button
-          className="rounded-full border bg-pink-500 px-4 text-sm font-semibold text-white hover:brightness-110 md:text-base"
+          className="rounded-full bg-pink-500 px-4 text-sm font-semibold text-white hover:brightness-110 md:text-base"
           onClick={(e) => {
             e.preventDefault();
             const payload = {
@@ -83,7 +83,7 @@ export const HabitDisplay = (props: IHabitDisplayProps) => {
         </div>
       </div>
       <div className="h-2 md:h-4" />
-      <div className="flex justify-between">
+      <div className="flex items-center gap-4 ">
         <DeleteHabit id={props.habit.id} />
         <StreakDisplay habit={props.habit} year={props.year} />
       </div>
@@ -155,10 +155,10 @@ function StreakDisplay({
   }
   return (
     <div
-      className={
-        "flex min-w-[1.8rem] items-center justify-center rounded-full border-2 border-violet-500 px-1 py-0.5 text-sm font-bold text-violet-500 brightness-110 md:min-w-[3rem] md:border-4 md:px-2 md:py-1 md:text-2xl " +
-        get_colors_based_on_streak_size(cur_streak)
-      }
+      title="Current streak"
+      className={`flex min-w-[1.9rem] items-center justify-center rounded-lg border-2 border-pink-500 px-1 py-0.5 text-sm font-bold text-pink-500 md:min-w-[2.5rem] md:border-2 md:text-xl ${get_colors_based_on_streak_size(
+        cur_streak
+      )}`}
     >
       {cur_streak}
     </div>
@@ -289,7 +289,7 @@ const DeleteHabit = ({ id }: IDeleteHabitProps) => {
       trigger={
         <button
           type="button"
-          className="rounded-full bg-red-500 py-1 px-3 text-sm font-semibold text-white hover:brightness-110 lg:py-2 lg:px-4 lg:text-base"
+          className="rounded-full bg-red-500 px-4 py-1 text-sm font-semibold text-white hover:brightness-110 md:text-base"
           onClick={() => set_is_modal_open(true)}
         >
           Remove

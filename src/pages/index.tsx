@@ -8,18 +8,26 @@ import { Spinner } from "../components/Spinner";
 import { get_years } from "../utils/calendar";
 import { ColorOption, COLOR_OPTIONS, COLOR_TO_CLASSNAME } from "../utils/types";
 import { signIn, signOut, useSession } from "next-auth/react";
+import { getServerAuthSession } from "../server/auth";
+import { type GetServerSideProps } from "next";
 
+//I should probably understand how this works, but I just ripped it from https://create.t3.gg/en/usage/next-auth
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+  const session = await getServerAuthSession(ctx);
+  return {
+    props: { session },
+  };
+};
 const Home: NextPage = () => {
   const all_habits = api.habit.get_all.useQuery();
   const [filter_text, set_filter_text] = useState("");
+  const session = useSession();
 
   if (all_habits.status === "error") {
     console.error(all_habits.error);
   }
-  const session = useSession();
 
   if (session.status === "loading") {
-    // if (true) {
     return (
       <div className="flex h-[95vh] items-center justify-center p-1 md:p-4">
         <Spinner className="h-16 w-16 border-4 border-solid border-white lg:border-8" />

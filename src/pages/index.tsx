@@ -36,16 +36,7 @@ const Home: NextPage = () => {
   }
 
   if (session.status === "unauthenticated") {
-    return (
-      <div className="flex h-[95vh] items-center justify-center p-1 md:p-4">
-        <button
-          className="rounded-full bg-pink-500 px-6 py-2 text-3xl font-semibold text-white shadow-sm shadow-pink-500 hover:brightness-110"
-          onClick={() => void signIn()}
-        >
-          Sign In
-        </button>
-      </div>
-    );
+    return <SignInPage />;
   }
 
   return (
@@ -117,6 +108,37 @@ const Home: NextPage = () => {
 };
 
 export default Home;
+
+function SignInPage() {
+  return (
+    <div className="h-[95vh] p-1 md:p-4">
+      <div className="flex justify-end">
+        <button
+          className="rounded-full bg-pink-500 px-3 py-1 font-semibold text-white shadow-sm shadow-pink-500 hover:brightness-110 md:px-6 md:py-2 md:text-xl"
+          onClick={() => void signIn()}
+        >
+          Sign In
+        </button>
+      </div>
+      <div className="h-8" />
+      <div className="ml-[3rem] flex flex-col gap-3 ">
+        <h1 className="text-2xl font-extrabold tracking-wider md:text-6xl lg:text-8xl">
+          <span
+            className="bg-gradient-to-l from-pink-400 to-pink-600 bg-clip-text text-transparent"
+            //className="text-gradient-to-r text-pink-500"
+          >
+            STREAK
+          </span>
+          <span className="text-white">GRAPH</span>
+        </h1>
+        <div className="ml-2 text-sm font-semibold leading-relaxed text-white md:text-xl">
+          <p>Track your habits with a simple grid.</p>
+          <p>Inspired by the Github contributions graph.</p>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function AddNewHabitButtonAndModal() {
   const [name, set_name] = useState("");

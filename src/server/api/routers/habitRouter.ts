@@ -6,17 +6,18 @@ import { createTRPCRouter, publicProcedure, protectedProcedure } from "../trpc";
 export const habit_router = createTRPCRouter({
   get_all: protectedProcedure.query(async ({ ctx }) => {
     // ctx.session.user.
-    const accounts = await ctx.prisma.account.findMany({ where: { userId: ctx.session.user.id } });
+    const accounts = await ctx.prisma.account.findMany({
+      where: { userId: ctx.session.user.id },
+    });
 
-    return await ctx.prisma.habit.findMany(
-      {
-        where: {
-          user_id: ctx.session.user.id
-        },
-        include: {
-          habit_day_drops: true
-        }
-      });
+    return await ctx.prisma.habit.findMany({
+      where: {
+        user_id: ctx.session.user.id,
+      },
+      include: {
+        habit_day_drops: true,
+      },
+    });
   }),
   create: protectedProcedure
     .input(z.object({ name: z.string(), color: z.enum(COLOR_OPTIONS) }))
@@ -26,7 +27,7 @@ export const habit_router = createTRPCRouter({
           name: input.name,
           color: input.color,
           streak: 0,
-          user_id: ctx.session.user.id
+          user_id: ctx.session.user.id,
         },
       });
     }),
@@ -36,11 +37,8 @@ export const habit_router = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       await ctx.prisma.habit.deleteMany({
         where: {
-          AND: [
-            { id: input.id },
-            { user_id: ctx.session.user.id }
-          ]
-        }
+          AND: [{ id: input.id }, { user_id: ctx.session.user.id }],
+        },
       });
     }),
   create_day_drop: protectedProcedure

@@ -109,7 +109,6 @@ export function use_delete_day_drop() {
     },
     onSettled: () => {
       console.log("onSettled");
-      // api_utils.habit.invalidate();
       api_utils.habit.get_all.invalidate();
     },
   });

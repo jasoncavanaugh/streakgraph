@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef, useEffect } from "react";
 import { Modal } from "./Modal";
 import * as RadixModal from "@radix-ui/react-dialog";
 import { api } from "../utils/api";
@@ -173,6 +173,11 @@ interface IHabitSquaresDisplay {
 const HabitSquaresDisplay = ({ habit, year, color }: IHabitSquaresDisplay) => {
   const create_day_drop = use_create_day_drop();
   const delete_day_drop = use_delete_day_drop();
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    ref?.current?.scrollIntoView({ block: "end", inline: "nearest" });
+  }, []);
+
   const [number_of_days_in_year, first_day_of_year] = useMemo(
     () => [get_number_of_days_in_year(year), get_first_day_of_year(year)],
     []
@@ -217,7 +222,15 @@ const HabitSquaresDisplay = ({ habit, year, color }: IHabitSquaresDisplay) => {
       />
     );
   }
-  for (; i <= number_of_days_in_year; i++) {
+  //Ref to scroll into view
+  output.push(
+    <div
+      ref={ref}
+      key={i}
+      className={`h-[20px] w-[20px] rounded-sm border ${COLOR_TO_CLASSNAME[color]["border"]} opacity-30 md:rounded md:border lg:h-[30px] lg:w-[30px]`}
+    ></div>
+  );
+  for (; i <= number_of_days_in_year - 1; i++) {
     output.push(
       <div
         key={i}

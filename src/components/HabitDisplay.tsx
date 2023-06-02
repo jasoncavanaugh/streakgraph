@@ -1,4 +1,4 @@
-import { useMemo, useState, useRef, useEffect } from "react";
+import { useMemo, useState, useRef, useEffect, forwardRef, RefObject } from "react";
 import { Modal } from "./Modal";
 import * as RadixModal from "@radix-ui/react-dialog";
 import { api } from "../utils/api";
@@ -204,6 +204,7 @@ const HabitSquaresDisplay = ({ habit, year, color }: IHabitSquaresDisplay) => {
     const day_name = get_day_name(year, month, day);
     output.push(
       <HabitDayDropTooltip
+        ref={i === day_out_of_year_for_today ? ref : null}
         key={i}
         color={color}
         is_checked={is_checked}
@@ -222,15 +223,7 @@ const HabitSquaresDisplay = ({ habit, year, color }: IHabitSquaresDisplay) => {
       />
     );
   }
-  //Ref to scroll into view
-  output.push(
-    <div
-      ref={ref}
-      key={i}
-      className={`h-[20px] w-[20px] rounded-sm border ${COLOR_TO_CLASSNAME[color]["border"]} opacity-30 md:rounded md:border lg:h-[30px] lg:w-[30px]`}
-    ></div>
-  );
-  for (; i <= number_of_days_in_year - 1; i++) {
+  for (; i <= number_of_days_in_year; i++) {
     output.push(
       <div
         key={i}
@@ -246,22 +239,21 @@ interface IHabitDayDropTooltipProps {
   content: string;
   color: ColorOption;
 }
-function HabitDayDropTooltip({
+const HabitDayDropTooltip = forwardRef<HTMLDivElement | null, IHabitDayDropTooltipProps>(({
   is_checked,
   on_click,
   content,
   color,
-}: IHabitDayDropTooltipProps) {
+}: IHabitDayDropTooltipProps, ref) => {
   return (
     <Tooltip.Provider delayDuration={100} skipDelayDuration={0}>
       <Tooltip.Root>
         <Tooltip.Trigger asChild>
           <div
-            className={`h-[20px] w-[20px] rounded-sm border ${
-              COLOR_TO_CLASSNAME[color]["border"]
-            } hover:cursor-pointer hover:brightness-110 md:rounded md:border lg:h-[30px] lg:w-[30px] ${
-              is_checked ? COLOR_TO_CLASSNAME[color]["bg"] : ""
-            }`}
+            ref={ref}
+            className={`h-[20px] w-[20px] rounded-sm border ${COLOR_TO_CLASSNAME[color]["border"]
+              } hover:cursor-pointer hover:brightness-110 md:rounded md:border lg:h-[30px] lg:w-[30px] ${is_checked ? COLOR_TO_CLASSNAME[color]["bg"] : ""
+              }`}
             onClick={on_click}
           />
         </Tooltip.Trigger>
@@ -277,7 +269,7 @@ function HabitDayDropTooltip({
       </Tooltip.Root>
     </Tooltip.Provider>
   );
-}
+});
 
 interface IDeleteHabitProps {
   id: string;

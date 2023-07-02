@@ -27,15 +27,15 @@ interface IHabitDisplayProps {
   habit: HabitWithDayDrops;
   year: number;
   color: ColorOption;
+  parent_ref: RefObject<HTMLButtonElement>;
+  is_last: boolean
 }
 export const HabitDisplay = (props: IHabitDisplayProps) => {
   const create_day_drop = use_create_day_drop();
   const delete_day_drop = use_delete_day_drop();
-  console.log("HabitDisplay, habit_day_drops", props.habit.habit_day_drops);
   const is_today_marked = determine_whether_today_is_marked(
     props.habit.habit_day_drops
   );
-  console.log("is_today_marked", is_today_marked);
 
   return (
     <li key={props.habit.id} className="rounded-lg border bg-white p-2 md:p-4">
@@ -75,6 +75,8 @@ export const HabitDisplay = (props: IHabitDisplayProps) => {
         <div className="overflow-x-auto">
           <div className="jason mb-4 gap-[0.15rem] md:gap-[0.2rem] lg:gap-[0.3rem]">
             <HabitSquaresDisplay
+              parent_ref={props.parent_ref}
+              is_last={props.is_last}
               color={props.color}
               habit={props.habit}
               year={props.year}
@@ -169,13 +171,18 @@ interface IHabitSquaresDisplay {
   habit: HabitWithDayDrops;
   year: number;
   color: ColorOption;
+  is_last: boolean;
+  parent_ref: RefObject<HTMLButtonElement>;
 }
-const HabitSquaresDisplay = ({ habit, year, color }: IHabitSquaresDisplay) => {
+const HabitSquaresDisplay = ({ habit, year, color, is_last, parent_ref }: IHabitSquaresDisplay) => {
   const create_day_drop = use_create_day_drop();
   const delete_day_drop = use_delete_day_drop();
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     ref?.current?.scrollIntoView({ block: "end", inline: "nearest" });
+    if (is_last) {
+      parent_ref.current?.scrollIntoView({ block: "end", inline: "nearest" });
+    }
   }, []);
 
   const [number_of_days_in_year, first_day_of_year] = useMemo(

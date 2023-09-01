@@ -85,15 +85,39 @@ export const HabitDisplay = (props: IHabitDisplayProps) => {
         </div>
       </div>
       <div className="h-2 md:h-4" />
-      <div className="flex items-center gap-4 ">
-        <DeleteHabit id={props.habit.id} />
-        <StreakDisplay habit={props.habit} year={props.year} />
+      <div className="flex justify-between">
+        <div className="flex gap-2">
+          <DeleteHabit id={props.habit.id} />
+          <StreakDisplay habit={props.habit} year={props.year} />
+        </div>
+        <YearPicker/>
       </div>
     </li>
   );
 };
 
 export default HabitDisplay;
+
+
+//trigger,
+//open,
+//on_open_change,
+//className = "",
+//children,
+function YearPicker() {
+  return (
+    <Modal
+      trigger={
+        <div className="rounded-full border border-slate-400 px-4 py-1">
+          2023
+        </div>
+      }
+      >
+
+
+    </Modal>
+  );
+}
 
 function get_colors_based_on_streak_size(streak_size: number) {
   // opacity-0	opacity: 0;

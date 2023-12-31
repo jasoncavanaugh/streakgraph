@@ -36,7 +36,7 @@ export function check_if_marked(
 
   return (
     drops.filter(
-      (drop) => drop.month === idx + 1 && drop.day === day_out_of_year
+      (drop) => drop.month === idx + 1 && drop.day === day_out_of_year && drop.year === year
     ).length > 0
   );
 }

@@ -1,4 +1,11 @@
-import { useMemo, useState, useRef, useEffect, forwardRef, RefObject } from "react";
+import {
+  useMemo,
+  useState,
+  useRef,
+  useEffect,
+  forwardRef,
+  RefObject,
+} from "react";
 import { Modal } from "./Modal";
 import * as RadixModal from "@radix-ui/react-dialog";
 import { api } from "../utils/api";
@@ -22,13 +29,13 @@ import {
   COLOR_TO_CLASSNAME,
   HabitWithDayDrops,
 } from "../utils/types";
+import { cn } from "../utils/cn";
 
 interface IHabitDisplayProps {
   habit: HabitWithDayDrops;
-  year: number;
   color: ColorOption;
   parent_ref: RefObject<HTMLButtonElement>;
-  is_last: boolean
+  is_last: boolean;
 }
 export const HabitDisplay = (props: IHabitDisplayProps) => {
   const create_day_drop = use_create_day_drop();
@@ -36,7 +43,9 @@ export const HabitDisplay = (props: IHabitDisplayProps) => {
   const is_today_marked = determine_whether_today_is_marked(
     props.habit.habit_day_drops
   );
+  const [year, set_year] = useState(new Date().getFullYear());
 
+  console.log("year", year)
   return (
     <li key={props.habit.id} className="rounded-lg border bg-white p-2 md:p-4">
       <div className="flex justify-between">
@@ -79,21 +88,57 @@ export const HabitDisplay = (props: IHabitDisplayProps) => {
               is_last={props.is_last}
               color={props.color}
               habit={props.habit}
-              year={props.year}
+              year={year}
+              // year={2022}
             />
           </div>
         </div>
       </div>
       <div className="h-2 md:h-4" />
-      <div className="flex items-center gap-4 ">
-        <DeleteHabit id={props.habit.id} />
-        <StreakDisplay habit={props.habit} year={props.year} />
+      <div className="flex flex-col gap-3 md:flex-row justify-between">
+        <div className="flex gap-2">
+          <DeleteHabit id={props.habit.id} />
+          <StreakDisplay habit={props.habit} year={year} />
+        </div>
+        <input className="border rounded px-2 py-1 text-lg" type="text" onChange={(e) => { 
+          console.log("e", e.target.value);
+          if (e.target.value.length !== 4) return;
+          set_year(parseInt(e.target.value));
+        }}/>
+        {/* <YearPicker habit={props.habit}/> */}
       </div>
     </li>
   );
 };
 
 export default HabitDisplay;
+
+//trigger,
+//open,
+//on_open_change,
+//className = "",
+//children,
+function get_min_year(habit: HabitWithDayDrops) {
+  let min_year = new Date().getFullYear();
+  const day_drops = habit.habit_day_drops;
+  for (const day_drop of day_drops) {
+    min_year = Math.min(min_year, day_drop.year);
+  }
+
+  return min_year;
+}
+function YearPicker({ habit }: { habit: HabitWithDayDrops }) {
+  const min_year = get_min_year(habit);
+  return (
+    <Modal
+      trigger={
+        <div className="rounded-full border border-slate-400 px-4 py-1">
+          2023
+        </div>
+      }
+    ></Modal>
+  );
+}
 
 function get_colors_based_on_streak_size(streak_size: number) {
   // opacity-0	opacity: 0;
@@ -144,6 +189,7 @@ function StreakDisplay({
 }) {
   const day_out_of_year_for_today = get_day_out_of_year(new Date());
   let cur_streak = 0;
+  //First check if previous days were marked to create the streak. We need to start from the day before yesterday. See comment below
   for (let i = day_out_of_year_for_today - 1; i >= 1; i--) {
     const is_checked = check_if_marked(i, habit.habit_day_drops, year);
     if (is_checked) {
@@ -152,15 +198,19 @@ function StreakDisplay({
       break;
     }
   }
+  //Check if today is marked. The reason we check this outside the loop is because if today is not marked, we still need to calculate the streak.
+  //In other words, if today was not marked, the streak is still not "broken". So this needs to be checked separate from everything else. If this 
+  //was checked inside the loop, the loop would prematurely terminate if today was not marked, and the streak would be set to 0
   if (check_if_marked(day_out_of_year_for_today, habit.habit_day_drops, year)) {
     cur_streak++;
   }
   return (
     <div
       title="Current streak"
-      className={`flex min-w-[1.9rem] items-center justify-center rounded-lg border-2 border-pink-500 px-1 py-0.5 text-sm font-bold text-pink-500 md:min-w-[2.5rem] md:border-2 md:text-xl ${get_colors_based_on_streak_size(
-        cur_streak
-      )}`}
+      className={cn(
+        "flex min-w-[1.9rem] items-center justify-center rounded-lg border-2 border-pink-500 px-1 py-0.5 text-sm font-bold text-pink-500 md:min-w-[2.5rem] md:border-2 md:text-xl",
+        get_colors_based_on_streak_size(cur_streak)
+      )}
     >
       {cur_streak}
     </div>
@@ -174,7 +224,13 @@ interface IHabitSquaresDisplay {
   is_last: boolean;
   parent_ref: RefObject<HTMLButtonElement>;
 }
-const HabitSquaresDisplay = ({ habit, year, color, is_last, parent_ref }: IHabitSquaresDisplay) => {
+const HabitSquaresDisplay = ({
+  habit,
+  year,
+  color,
+  is_last,
+  parent_ref,
+}: IHabitSquaresDisplay) => {
   const create_day_drop = use_create_day_drop();
   const delete_day_drop = use_delete_day_drop();
   const ref = useRef<HTMLDivElement>(null);
@@ -187,7 +243,7 @@ const HabitSquaresDisplay = ({ habit, year, color, is_last, parent_ref }: IHabit
 
   const [number_of_days_in_year, first_day_of_year] = useMemo(
     () => [get_number_of_days_in_year(year), get_first_day_of_year(year)],
-    []
+    [year]
   );
 
   //UI
@@ -200,7 +256,11 @@ const HabitSquaresDisplay = ({ habit, year, color, is_last, parent_ref }: IHabit
       />
     );
   }
-  const day_out_of_year_for_today = get_day_out_of_year(new Date());
+  const day_out_of_year_for_today = 
+    new Date().getFullYear() === year ? get_day_out_of_year(new Date()) 
+    : new Date().getFullYear() < year ? 0
+    : number_of_days_in_year;
+
   let i = 1;
   for (; i <= day_out_of_year_for_today; i++) {
     const is_checked = check_if_marked(i, habit.habit_day_drops, year);
@@ -246,37 +306,42 @@ interface IHabitDayDropTooltipProps {
   content: string;
   color: ColorOption;
 }
-const HabitDayDropTooltip = forwardRef<HTMLDivElement | null, IHabitDayDropTooltipProps>(({
-  is_checked,
-  on_click,
-  content,
-  color,
-}: IHabitDayDropTooltipProps, ref) => {
-  return (
-    <Tooltip.Provider delayDuration={100} skipDelayDuration={0}>
-      <Tooltip.Root>
-        <Tooltip.Trigger asChild>
-          <div
-            ref={ref}
-            className={`h-[20px] w-[20px] rounded-sm border ${COLOR_TO_CLASSNAME[color]["border"]
-              } hover:cursor-pointer hover:brightness-110 md:rounded md:border lg:h-[30px] lg:w-[30px] ${is_checked ? COLOR_TO_CLASSNAME[color]["bg"] : ""
+const HabitDayDropTooltip = forwardRef<
+  HTMLDivElement | null,
+  IHabitDayDropTooltipProps
+>(
+  (
+    { is_checked, on_click, content, color }: IHabitDayDropTooltipProps,
+    ref
+  ) => {
+    return (
+      <Tooltip.Provider delayDuration={100} skipDelayDuration={0}>
+        <Tooltip.Root>
+          <Tooltip.Trigger asChild>
+            <div
+              ref={ref}
+              className={`h-[20px] w-[20px] rounded-sm border ${
+                COLOR_TO_CLASSNAME[color]["border"]
+              } hover:cursor-pointer hover:brightness-110 md:rounded md:border lg:h-[30px] lg:w-[30px] ${
+                is_checked ? COLOR_TO_CLASSNAME[color]["bg"] : ""
               }`}
-            onClick={on_click}
-          />
-        </Tooltip.Trigger>
-        <Tooltip.Portal>
-          <Tooltip.Content
-            //Taken from https://ui.shadcn.com/docs/primitives/tooltip
-            className="animate-in fade-in-50 data-[side=bottom]:slide-in-from-top-1 data-[side=top]:slide-in-from-bottom-1 data-[side=left]:slide-in-from-right-1 data-[side=right]:slide-in-from-left-1 z-50 overflow-hidden rounded-md border border-slate-100 bg-white p-3 text-sm text-slate-700 shadow-md dark:border-slate-800 dark:bg-slate-800 dark:text-slate-400"
-          >
-            {content}
-            <Tooltip.Arrow className="fill-white" />
-          </Tooltip.Content>
-        </Tooltip.Portal>
-      </Tooltip.Root>
-    </Tooltip.Provider>
-  );
-});
+              onClick={on_click}
+            />
+          </Tooltip.Trigger>
+          <Tooltip.Portal>
+            <Tooltip.Content
+              //Taken from https://ui.shadcn.com/docs/primitives/tooltip
+              className="animate-in fade-in-50 data-[side=bottom]:slide-in-from-top-1 data-[side=top]:slide-in-from-bottom-1 data-[side=left]:slide-in-from-right-1 data-[side=right]:slide-in-from-left-1 z-50 overflow-hidden rounded-md border border-slate-100 bg-white p-3 text-sm text-slate-700 shadow-md dark:border-slate-800 dark:bg-slate-800 dark:text-slate-400"
+            >
+              {content}
+              <Tooltip.Arrow className="fill-white" />
+            </Tooltip.Content>
+          </Tooltip.Portal>
+        </Tooltip.Root>
+      </Tooltip.Provider>
+    );
+  }
+);
 
 interface IDeleteHabitProps {
   id: string;

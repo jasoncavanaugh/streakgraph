@@ -110,7 +110,8 @@ function render_habits(habits: HabitWithDayDrops[], parent_ref: RefObject<HTMLBu
             color={habit.color as ColorOption}
             key={habit.id}
             habit={habit}
-            year={2023}
+            // year={2023}
+            // year={new Date().getFullYear()}
             is_last={i === habits.length - 1}
           />
         );

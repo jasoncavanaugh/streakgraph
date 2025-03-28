@@ -188,31 +188,16 @@ function StreakDisplay({
   year: number;
 }) {
   const day_out_of_year_for_today = get_day_out_of_year(new Date());
-  let cur_streak = 0;
-  //First check if previous days were marked to create the streak. We need to start from the day before yesterday. See comment below
-  for (let i = day_out_of_year_for_today - 1; i >= 1; i--) {
-    const is_checked = check_if_marked(i, habit.habit_day_drops, year);
-    if (is_checked) {
-      cur_streak++;
-    } else {
-      break;
-    }
-  }
-  //Check if today is marked. The reason we check this outside the loop is because if today is not marked, we still need to calculate the streak.
-  //In other words, if today was not marked, the streak is still not "broken". So this needs to be checked separate from everything else. If this 
-  //was checked inside the loop, the loop would prematurely terminate if today was not marked, and the streak would be set to 0
-  if (check_if_marked(day_out_of_year_for_today, habit.habit_day_drops, year)) {
-    cur_streak++;
-  }
+  let total = habit.habit_day_drops.filter((drop) => drop.year === year);
+ 
   return (
     <div
       title="Current streak"
       className={cn(
-        "flex min-w-[1.9rem] items-center justify-center rounded-lg border-2 border-pink-500 px-1 py-0.5 text-sm font-bold text-pink-500 md:min-w-[2.5rem] md:border-2 md:text-xl",
-        get_colors_based_on_streak_size(cur_streak)
+        "flex min-w-[1.9rem] items-center justify-center rounded-lg border-2 border-pink-500 px-1 py-0.5 text-sm font-bold text-pink-500 md:min-w-[2.5rem] md:border-2 md:text-xl"
       )}
     >
-      {cur_streak}
+      {total}
     </div>
   );
 }

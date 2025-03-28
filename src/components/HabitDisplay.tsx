@@ -188,7 +188,7 @@ function StreakDisplay({
   year: number;
 }) {
   const day_out_of_year_for_today = get_day_out_of_year(new Date());
-  let total = habit.habit_day_drops.filter((drop) => drop.year === year);
+  let total = habit.habit_day_drops.filter((drop) => drop.year === year).length;
  
   return (
     <div

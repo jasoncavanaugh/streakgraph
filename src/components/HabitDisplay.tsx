@@ -30,6 +30,13 @@ import {
   HabitWithDayDrops,
 } from "../utils/types";
 import { cn } from "../utils/cn";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
 
 interface IHabitDisplayProps {
   habit: HabitWithDayDrops;
@@ -45,7 +52,6 @@ export const HabitDisplay = (props: IHabitDisplayProps) => {
   );
   const [year, set_year] = useState(new Date().getFullYear());
 
-  console.log("year", year)
   return (
     <li key={props.habit.id} className="rounded-lg border bg-white p-2 md:p-4">
       <div className="flex justify-between">
@@ -72,7 +78,7 @@ export const HabitDisplay = (props: IHabitDisplayProps) => {
       </div>
       <div className="h-2 md:h-4" />
       <div className="flex gap-0">
-        <div className="mt-[-0.25rem] mr-2 mb-4 flex flex-col justify-around text-xs lg:mr-4 lg:text-base">
+        <div className="mb-4 mr-2 mt-[-0.25rem] flex flex-col justify-around text-xs lg:mr-4 lg:text-base">
           <p>Sun</p>
           <p>Mon</p>
           <p>Tue</p>
@@ -89,23 +95,21 @@ export const HabitDisplay = (props: IHabitDisplayProps) => {
               color={props.color}
               habit={props.habit}
               year={year}
-              // year={2022}
             />
           </div>
         </div>
       </div>
       <div className="h-2 md:h-4" />
-      <div className="flex flex-col gap-3 md:flex-row justify-between">
+      <div className="flex flex-col justify-between gap-3 md:flex-row">
         <div className="flex gap-2">
           <DeleteHabit id={props.habit.id} />
           <StreakDisplay habit={props.habit} year={year} />
         </div>
-        <input className="border rounded px-2 py-1 text-lg" type="text" onChange={(e) => { 
-          console.log("e", e.target.value);
-          if (e.target.value.length !== 4) return;
-          set_year(parseInt(e.target.value));
-        }}/>
-        {/* <YearPicker habit={props.habit}/> */}
+        <YearPicker
+          current_year={year}
+          habit={props.habit}
+          set_year={set_year}
+        />
       </div>
     </li>
   );
@@ -127,16 +131,41 @@ function get_min_year(habit: HabitWithDayDrops) {
 
   return min_year;
 }
-function YearPicker({ habit }: { habit: HabitWithDayDrops }) {
+
+function YearPicker({
+  current_year,
+  habit,
+  set_year,
+}: {
+  current_year: number;
+  habit: HabitWithDayDrops;
+  set_year: (new_year: number) => void;
+}) {
   const min_year = get_min_year(habit);
+  let year_options = [];
+  for (let y = min_year; y <= current_year; y++) {
+    year_options.push(
+      <SelectItem key={y} value={y.toString()}>
+        {y}
+      </SelectItem>
+    );
+  }
   return (
-    <Modal
-      trigger={
-        <div className="rounded-full border border-slate-400 px-4 py-1">
-          2023
-        </div>
-      }
-    ></Modal>
+    <Select
+      onValueChange={(new_year_str) => {
+        set_year(parseInt(new_year_str));
+      }}
+    >
+      <SelectTrigger className="w-[180px]">
+        <SelectValue placeholder="Year" defaultValue={current_year} />
+      </SelectTrigger>
+      <SelectContent>
+        {year_options}
+        {/* <SelectItem value="light">Light</SelectItem>
+        <SelectItem value="dark">Dark</SelectItem>
+        <SelectItem value="system">System</SelectItem> */}
+      </SelectContent>
+    </Select>
   );
 }
 
@@ -189,7 +218,7 @@ function StreakDisplay({
 }) {
   const day_out_of_year_for_today = get_day_out_of_year(new Date());
   let total = habit.habit_day_drops.filter((drop) => drop.year === year).length;
- 
+
   return (
     <div
       title="Current streak"
@@ -241,10 +270,12 @@ const HabitSquaresDisplay = ({
       />
     );
   }
-  const day_out_of_year_for_today = 
-    new Date().getFullYear() === year ? get_day_out_of_year(new Date()) 
-    : new Date().getFullYear() < year ? 0
-    : number_of_days_in_year;
+  const day_out_of_year_for_today =
+    new Date().getFullYear() === year
+      ? get_day_out_of_year(new Date())
+      : new Date().getFullYear() < year
+      ? 0
+      : number_of_days_in_year;
 
   let i = 1;
   for (; i <= day_out_of_year_for_today; i++) {
@@ -316,7 +347,7 @@ const HabitDayDropTooltip = forwardRef<
           <Tooltip.Portal>
             <Tooltip.Content
               //Taken from https://ui.shadcn.com/docs/primitives/tooltip
-              className="animate-in fade-in-50 data-[side=bottom]:slide-in-from-top-1 data-[side=top]:slide-in-from-bottom-1 data-[side=left]:slide-in-from-right-1 data-[side=right]:slide-in-from-left-1 z-50 overflow-hidden rounded-md border border-slate-100 bg-white p-3 text-sm text-slate-700 shadow-md dark:border-slate-800 dark:bg-slate-800 dark:text-slate-400"
+              className="z-50 overflow-hidden rounded-md border border-slate-100 bg-white p-3 text-sm text-slate-700 shadow-md animate-in fade-in-50 data-[side=bottom]:slide-in-from-top-1 data-[side=left]:slide-in-from-right-1 data-[side=right]:slide-in-from-left-1 data-[side=top]:slide-in-from-bottom-1 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-400"
             >
               {content}
               <Tooltip.Arrow className="fill-white" />

@@ -6,7 +6,12 @@ import { Modal } from "../components/Modal";
 import { HabitDisplay } from "../components/HabitDisplay";
 import { Spinner } from "../components/Spinner";
 import { get_years } from "../utils/calendar";
-import { ColorOption, COLOR_OPTIONS, COLOR_TO_CLASSNAME, HabitWithDayDrops } from "../utils/types";
+import {
+  ColorOption,
+  COLOR_OPTIONS,
+  COLOR_TO_CLASSNAME,
+  HabitWithDayDrops,
+} from "../utils/types";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { getServerAuthSession } from "../server/auth";
 import { type GetServerSideProps } from "next";
@@ -21,7 +26,6 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 const Home: NextPage = () => {
   const all_habits = api.habit.get_all.useQuery();
   const ref = useRef<HTMLButtonElement>(null);
-  const [filter_text, set_filter_text] = useState("");
   const session = useSession();
 
   if (all_habits.status === "error") {
@@ -42,15 +46,7 @@ const Home: NextPage = () => {
 
   return (
     <div className="p-1 md:p-4">
-      <div className="flex flex-col-reverse items-end justify-between gap-2 px-1 pt-2  md:flex-row md:pt-0">
-        <input
-          autoComplete="off"
-          className="w-full rounded-full px-3 py-1 outline-0 md:w-1/3"
-          placeholder="Search..."
-          value={filter_text}
-          onChange={(e) => set_filter_text(e.target.value)}
-          type="search"
-        ></input>
+      <div className="flex flex-col-reverse items-end justify-end gap-2 px-1 pt-2  md:flex-row md:pt-0">
         <button
           className="rounded-full bg-pink-500 px-3 py-1 text-sm font-semibold text-white shadow-sm shadow-pink-500 hover:brightness-110 md:px-5 md:text-lg"
           onClick={() => void signOut()}
@@ -82,16 +78,7 @@ const Home: NextPage = () => {
         )}
         {all_habits.status === "success" &&
           all_habits.data.length > 0 &&
-          render_habits(all_habits.data
-            .filter((habit) => {
-              if (filter_text.length === 0) return true;
-              const filter_text_lower = filter_text.toLowerCase();
-              const habit_name_lower = habit.name.toLowerCase();
-              return (
-                filter_text_lower.includes(habit_name_lower) ||
-                habit_name_lower.includes(filter_text_lower)
-              );
-            }), ref)}
+          render_habits(all_habits.data, ref)}
       </ul>
       <AddNewHabitButtonAndModal />
     </div>
@@ -100,7 +87,10 @@ const Home: NextPage = () => {
 
 export default Home;
 
-function render_habits(habits: HabitWithDayDrops[], parent_ref: RefObject<HTMLButtonElement>) {
+function render_habits(
+  habits: HabitWithDayDrops[],
+  parent_ref: RefObject<HTMLButtonElement>
+) {
   return (
     <>
       {habits.map((habit, i) => {
@@ -134,7 +124,7 @@ function SignInPage() {
         <h1 className="text-2xl font-extrabold tracking-wider md:text-6xl lg:text-8xl">
           <span
             className="bg-gradient-to-l from-pink-400 to-pink-600 bg-clip-text text-transparent"
-          //className="text-gradient-to-r text-pink-500"
+            //className="text-gradient-to-r text-pink-500"
           >
             STREAK
           </span>
@@ -181,7 +171,7 @@ function AddNewHabitButtonAndModal() {
           +
         </button>
       }
-      className="top-1/3 left-1/2 flex w-[30rem] -translate-x-1/2 -translate-y-1/2 flex-col border-t-8 border-t-pink-500 px-5 py-3 lg:top-1/2 lg:px-8 lg:py-6"
+      className="left-1/2 top-1/3 flex w-[30rem] -translate-x-1/2 -translate-y-1/2 flex-col border-t-8 border-t-pink-500 px-5 py-3 lg:top-1/2 lg:px-8 lg:py-6"
     >
       <form
         onSubmit={(e) => {
@@ -227,10 +217,11 @@ function AddNewHabitButtonAndModal() {
             Cancel
           </button>
           <button
-            className={`rounded-full bg-pink-500 px-3 py-2 text-xs font-semibold text-white lg:px-5 lg:py-3 lg:text-base lg:font-bold ${add_habit_disabled
+            className={`rounded-full bg-pink-500 px-3 py-2 text-xs font-semibold text-white lg:px-5 lg:py-3 lg:text-base lg:font-bold ${
+              add_habit_disabled
                 ? "opacity-50"
                 : "hover:cursor-pointer hover:brightness-110"
-              }`}
+            }`}
             type="submit"
             disabled={add_habit_disabled}
           >
@@ -255,11 +246,13 @@ function ColorSelection(props: {
         return (
           <div
             key={option}
-            className={`${COLOR_TO_CLASSNAME[option]["bg"]
-              } h-6 w-6 rounded-md border-2 ${props.selected_color === option
+            className={`${
+              COLOR_TO_CLASSNAME[option]["bg"]
+            } h-6 w-6 rounded-md border-2 ${
+              props.selected_color === option
                 ? "border-slate-900 brightness-110"
                 : "border-white hover:cursor-pointer hover:border-slate-900 hover:brightness-110"
-              } lg:h-8 lg:w-8`}
+            } lg:h-8 lg:w-8`}
             onClick={() => props.on_select_color(option)}
           />
         );

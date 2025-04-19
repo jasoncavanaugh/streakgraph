@@ -103,13 +103,9 @@ export const HabitDisplay = (props: IHabitDisplayProps) => {
       <div className="flex flex-col justify-between gap-3 md:flex-row">
         <div className="flex gap-2">
           <DeleteHabit id={props.habit.id} />
-          <StreakDisplay habit={props.habit} year={year} />
+          <TotalDisplay habit={props.habit} year={year} />
         </div>
-        <YearPicker
-          current_year={year}
-          habit={props.habit}
-          set_year={set_year}
-        />
+        <YearPicker year={year} habit={props.habit} set_year={set_year} />
       </div>
     </li>
   );
@@ -117,33 +113,30 @@ export const HabitDisplay = (props: IHabitDisplayProps) => {
 
 export default HabitDisplay;
 
-//trigger,
-//open,
-//on_open_change,
-//className = "",
-//children,
-function get_min_year(habit: HabitWithDayDrops) {
+function get_min_max_year(habit: HabitWithDayDrops) {
   let min_year = new Date().getFullYear();
+  let max_year = 0;
   const day_drops = habit.habit_day_drops;
   for (const day_drop of day_drops) {
     min_year = Math.min(min_year, day_drop.year);
+    max_year = Math.max(max_year, day_drop.year);
   }
 
-  return min_year;
+  return { min_year, max_year };
 }
 
 function YearPicker({
-  current_year,
+  year,
   habit,
   set_year,
 }: {
-  current_year: number;
+  year: number;
   habit: HabitWithDayDrops;
   set_year: (new_year: number) => void;
 }) {
-  const min_year = get_min_year(habit);
+  const { min_year, max_year } = get_min_max_year(habit);
   let year_options = [];
-  for (let y = min_year; y <= current_year; y++) {
+  for (let y = min_year; y <= max_year; y++) {
     year_options.push(
       <SelectItem key={y} value={y.toString()}>
         {y}
@@ -155,73 +148,27 @@ function YearPicker({
       onValueChange={(new_year_str) => {
         set_year(parseInt(new_year_str));
       }}
+      value={year.toString()}
     >
       <SelectTrigger className="w-[180px]">
-        <SelectValue placeholder="Year" defaultValue={current_year} />
+        <SelectValue placeholder="Year" defaultValue={year} />
       </SelectTrigger>
-      <SelectContent>
-        {year_options}
-        {/* <SelectItem value="light">Light</SelectItem>
-        <SelectItem value="dark">Dark</SelectItem>
-        <SelectItem value="system">System</SelectItem> */}
-      </SelectContent>
+      <SelectContent>{year_options}</SelectContent>
     </Select>
   );
 }
 
-function get_colors_based_on_streak_size(streak_size: number) {
-  // opacity-0	opacity: 0;
-  // opacity-5	opacity: 0.05;
-  // opacity-10	opacity: 0.1;
-  // opacity-20	opacity: 0.2;
-  // opacity-25	opacity: 0.25;
-  // opacity-30	opacity: 0.3;
-  // opacity-40	opacity: 0.4;
-  // opacity-50	opacity: 0.5;
-  // opacity-60	opacity: 0.6;
-  // opacity-70	opacity: 0.7;
-  // opacity-75	opacity: 0.75;
-  // opacity-80	opacity: 0.8;
-  // opacity-90	opacity: 0.9;
-  // opacity-95	opacity: 0.95;
-  // opacity-100	opacity: 1;
-  if (streak_size < 1) {
-    // Increase the distance by 1 for each level
-    return "opacity-30";
-  } else if (streak_size < 2) {
-    return "opacity-40";
-  } else if (streak_size < 4) {
-    return "opacity-50";
-  } else if (streak_size < 7) {
-    return "opacity-60";
-  } else if (streak_size < 11) {
-    return "opacity-70";
-  } else if (streak_size < 16) {
-    return "opacity-75";
-  } else if (streak_size < 22) {
-    return "opacity-80";
-  } else if (streak_size < 29) {
-    return "opacity-90";
-  } else if (streak_size < 37) {
-    return "opacity-95";
-  } else {
-    return "opacity-100";
-  }
-}
-
-function StreakDisplay({
+function TotalDisplay({
   habit,
   year,
 }: {
   habit: HabitWithDayDrops;
   year: number;
 }) {
-  const day_out_of_year_for_today = get_day_out_of_year(new Date());
   let total = habit.habit_day_drops.filter((drop) => drop.year === year).length;
-
   return (
     <div
-      title="Current streak"
+      title="Total"
       className={cn(
         "flex min-w-[1.9rem] items-center justify-center rounded-lg border-2 border-pink-500 px-1 py-0.5 text-sm font-bold text-pink-500 md:min-w-[2.5rem] md:border-2 md:text-xl"
       )}

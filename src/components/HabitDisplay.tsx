@@ -143,6 +143,7 @@ function YearPicker({
       </SelectItem>
     );
   }
+
   return (
     <Select
       onValueChange={(new_year_str) => {

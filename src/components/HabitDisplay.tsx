@@ -37,6 +37,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
+import * as SelectPrimitive from "@radix-ui/react-select";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import { Button } from "./ui/button";
+import { Check, ChevronDown, ChevronsUpDown } from "lucide-react";
+import {
+  Command,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "./ui/command";
+import { Command as CommandPrimitive } from "cmdk";
+import { Input } from "./ui/input";
 
 interface IHabitDisplayProps {
   habit: HabitWithDayDrops;
@@ -113,16 +126,15 @@ export const HabitDisplay = (props: IHabitDisplayProps) => {
 
 export default HabitDisplay;
 
-function get_min_max_year(habit: HabitWithDayDrops) {
-  let min_year = new Date().getFullYear();
-  let max_year = 0;
-  const day_drops = habit.habit_day_drops;
-  for (const day_drop of day_drops) {
-    min_year = Math.min(min_year, day_drop.year);
-    max_year = Math.max(max_year, day_drop.year);
+function get_year_options(habit: HabitWithDayDrops) {
+  const year_options: Array<number> = [];
+  for (const day_drop of habit.habit_day_drops) {
+    if (!year_options.includes(day_drop.year)) {
+      year_options.push(day_drop.year);
+    }
   }
-
-  return { min_year, max_year };
+  year_options.sort();
+  return year_options;
 }
 
 function YearPicker({
@@ -134,29 +146,74 @@ function YearPicker({
   habit: HabitWithDayDrops;
   set_year: (new_year: number) => void;
 }) {
-  const { min_year, max_year } = get_min_max_year(habit);
+  const [open, set_open] = useState(false);
+  const [year_value, set_year_value] = useState(year.toString());
+  const year_values = get_year_options(habit);
   let year_options = [];
-  for (let y = min_year; y <= max_year; y++) {
+  for (const y of year_values) {
     year_options.push(
-      <SelectItem key={y} value={y.toString()}>
+      <SelectItem
+        key={y}
+        value={y.toString()}
+        onSelect={() => {
+          set_year_value(y.toString());
+          set_year(y);
+          set_open(false);
+        }}
+      >
         {y}
       </SelectItem>
     );
   }
 
   return (
-    <Select
-      onValueChange={(new_year_str) => {
-        set_year(parseInt(new_year_str));
-      }}
-      value={year.toString()}
-    >
-      <SelectTrigger className="w-[180px]">
-        <SelectValue placeholder="Year" defaultValue={year} />
-      </SelectTrigger>
-      <SelectContent>{year_options}</SelectContent>
-    </Select>
+    <div className="flex">
+      <Input
+        className="rounded-r-none border-r-transparent focus-visible:ring-1 focus-visible:ring-offset-1"
+        value={year_value}
+        onChange={(e) => {
+          if (
+            e.target.value.length === 4 &&
+            !Number.isNaN(parseInt(e.target.value))
+          ) {
+            set_year(parseInt(e.target.value));
+          }
+          set_year_value(e.target.value);
+        }}
+      />
+      <SelectPrimitive.Root
+        disabled={year_options.length === 0}
+        value={year.toString()}
+        onValueChange={(new_value) => {
+          set_year_value(new_value);
+          set_year(parseInt(new_value));
+        }}
+      >
+        <SelectPrimitive.Trigger>
+          <SelectPrimitive.Icon asChild>
+            <Button size="icon" className="rounded-none rounded-r-md">
+              <ChevronDown className="h-4 w-4 opacity-50" />
+            </Button>
+          </SelectPrimitive.Icon>
+        </SelectPrimitive.Trigger>
+        <SelectContent>{year_options}</SelectContent>
+      </SelectPrimitive.Root>
+    </div>
   );
+
+  // return (
+  //   <Select
+  //     onValueChange={(new_year_str) => {
+  //       set_year(parseInt(new_year_str));
+  //     }}
+  //     value={year.toString()}
+  //   >
+  //     <SelectTrigger className="w-[180px]">
+  //       <SelectValue placeholder="Year" defaultValue={year} />
+  //     </SelectTrigger>
+  //     <SelectContent>{year_options}</SelectContent>
+  //   </Select>
+  // );
 }
 
 function TotalDisplay({

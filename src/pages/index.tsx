@@ -56,7 +56,7 @@ const Home: NextPage = () => {
         </button>
       </div>
       <div className="h-2 md:h-4" />
-      <ul className="flex flex-col gap-4 ">
+      <ul className="flex flex-col gap-4">
         {all_habits.status === "loading" && (
           <div className="flex h-[95vh] items-center justify-center">
             <Spinner className="h-16 w-16 border-4 border-solid border-white lg:border-8" />

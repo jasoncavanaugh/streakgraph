@@ -56,6 +56,7 @@ import {
 } from "./ui/command";
 import { Command as CommandPrimitive } from "cmdk";
 import { Input } from "./ui/input";
+import { ScrollArea, ScrollBar } from "./ui/scroll-area";
 
 interface IHabitDisplayProps {
   habit: HabitWithDayDrops;
@@ -106,7 +107,8 @@ export const HabitDisplay = (props: IHabitDisplayProps) => {
           <p>Fri</p>
           <p>Sat</p>
         </div>
-        <div className="overflow-x-auto">
+        {/* <div className="overflow-x-auto"> */}
+        <ScrollArea>
           <div className="jason mb-4 gap-[0.15rem] md:gap-[0.2rem] lg:gap-[0.3rem]">
             <HabitSquaresDisplay
               parent_ref={props.parent_ref}
@@ -115,8 +117,10 @@ export const HabitDisplay = (props: IHabitDisplayProps) => {
               habit={props.habit}
               year={year}
             />
+            <ScrollBar orientation="horizontal" />
           </div>
-        </div>
+        </ScrollArea>
+        {/* </div> */}
       </div>
       <div className="h-2 md:h-4" />
       <div className="flex justify-between gap-3">

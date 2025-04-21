@@ -40,7 +40,13 @@ import {
 import * as SelectPrimitive from "@radix-ui/react-select";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { Button } from "./ui/button";
-import { Check, ChevronDown, ChevronsUpDown } from "lucide-react";
+import {
+  Check,
+  ChevronDown,
+  ChevronsUpDown,
+  Trash2Icon,
+  TrashIcon,
+} from "lucide-react";
 import {
   Command,
   CommandGroup,
@@ -72,7 +78,7 @@ export const HabitDisplay = (props: IHabitDisplayProps) => {
           {props.habit.name}
         </h1>
         <button
-          className="rounded-full bg-pink-500 px-4 text-sm font-semibold text-white hover:brightness-110 md:text-base"
+          className="rounded bg-pink-500 px-4 text-sm font-semibold text-white hover:brightness-110 md:text-base"
           onClick={(e) => {
             e.preventDefault();
             const payload = {
@@ -113,7 +119,7 @@ export const HabitDisplay = (props: IHabitDisplayProps) => {
         </div>
       </div>
       <div className="h-2 md:h-4" />
-      <div className="flex flex-col justify-between gap-3 md:flex-row">
+      <div className="flex justify-between gap-3">
         <div className="flex gap-2">
           <DeleteHabit id={props.habit.id} />
           <TotalDisplay habit={props.habit} year={year} />
@@ -146,19 +152,18 @@ function YearPicker({
   habit: HabitWithDayDrops;
   set_year: (new_year: number) => void;
 }) {
-  const [open, set_open] = useState(false);
   const [year_value, set_year_value] = useState(year.toString());
   const year_values = get_year_options(habit);
   let year_options = [];
   for (const y of year_values) {
     year_options.push(
       <SelectItem
+        className="hover:cursor-pointer"
         key={y}
         value={y.toString()}
         onSelect={() => {
           set_year_value(y.toString());
           set_year(y);
-          set_open(false);
         }}
       >
         {y}
@@ -169,13 +174,11 @@ function YearPicker({
   return (
     <div className="flex">
       <Input
-        className="rounded-r-none border-r-transparent focus-visible:ring-1 focus-visible:ring-offset-1"
+        className="w-24 rounded-r-none border-r-transparent focus-visible:ring-1 focus-visible:ring-offset-1"
         value={year_value}
         onChange={(e) => {
-          if (
-            e.target.value.length === 4 &&
-            !Number.isNaN(parseInt(e.target.value))
-          ) {
+          const is_four_dig_num = /^[1-9]\d{3}$/.test(e.target.value);
+          if (is_four_dig_num) {
             set_year(parseInt(e.target.value));
           }
           set_year_value(e.target.value);
@@ -189,14 +192,12 @@ function YearPicker({
           set_year(parseInt(new_value));
         }}
       >
-        <SelectPrimitive.Trigger>
-          <SelectPrimitive.Icon asChild>
-            <Button size="icon" className="rounded-none rounded-r-md">
-              <ChevronDown className="h-4 w-4 opacity-50" />
-            </Button>
-          </SelectPrimitive.Icon>
+        <SelectPrimitive.Trigger asChild>
+          <Button size="icon" className="rounded-none rounded-r-md">
+            <ChevronDown className="h-4 w-4 font-bold text-white" />
+          </Button>
         </SelectPrimitive.Trigger>
-        <SelectContent>{year_options}</SelectContent>
+        <SelectContent align="end">{year_options}</SelectContent>
       </SelectPrimitive.Root>
     </div>
   );
@@ -228,7 +229,7 @@ function TotalDisplay({
     <div
       title="Total"
       className={cn(
-        "flex min-w-[1.9rem] items-center justify-center rounded-lg border-2 border-pink-500 px-1 py-0.5 text-sm font-bold text-pink-500 md:min-w-[2.5rem] md:border-2 md:text-xl"
+        "flex min-w-[2.25rem] items-center justify-center rounded-lg border-2 border-pink-500 px-1 py-0.5 text-sm font-bold text-pink-500 md:min-w-[2.5rem] md:border-2 md:text-xl"
       )}
     >
       {total}
@@ -387,10 +388,10 @@ const DeleteHabit = ({ id }: IDeleteHabitProps) => {
       trigger={
         <button
           type="button"
-          className="rounded-full bg-red-500 px-4 py-1 text-sm font-semibold text-white hover:brightness-110 md:text-base"
+          className="rounded bg-red-500 p-3 text-white hover:brightness-110"
           onClick={() => set_is_modal_open(true)}
         >
-          Remove
+          <Trash2Icon className="h-4 w-4" />
         </button>
       }
       className="left-1/2 top-1/2 flex w-[20rem] -translate-x-1/2 -translate-y-1/2 flex-col border-t-8 border-t-red-500 px-5 py-3 lg:top-1/2 lg:w-[30rem] lg:px-8 lg:py-6"

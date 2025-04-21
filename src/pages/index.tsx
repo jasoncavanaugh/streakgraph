@@ -48,7 +48,7 @@ const Home: NextPage = () => {
     <div className="p-1 md:p-4">
       <div className="flex flex-col-reverse items-end justify-end gap-2 px-1 pt-2  md:flex-row md:pt-0">
         <button
-          className="rounded-full bg-pink-500 px-3 py-1 text-sm font-semibold text-white shadow-sm shadow-pink-500 hover:brightness-110 md:px-5 md:text-lg"
+          className="rounded bg-pink-500 px-3 py-1 text-sm font-semibold text-white shadow-sm shadow-pink-500 hover:brightness-110 md:px-5 md:text-lg"
           onClick={() => void signOut()}
           ref={ref}
         >
@@ -56,7 +56,7 @@ const Home: NextPage = () => {
         </button>
       </div>
       <div className="h-2 md:h-4" />
-      <ul className="flex flex-col gap-4 rounded-lg bg-slate-500 p-2 md:p-4">
+      <ul className="flex flex-col gap-4 ">
         {all_habits.status === "loading" && (
           <div className="flex h-[95vh] items-center justify-center">
             <Spinner className="h-16 w-16 border-4 border-solid border-white lg:border-8" />

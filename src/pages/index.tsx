@@ -15,6 +15,7 @@ import {
 import { signIn, signOut, useSession } from "next-auth/react";
 import { getServerAuthSession } from "../server/auth";
 import { type GetServerSideProps } from "next";
+import { cn } from "../utils/cn";
 
 //I should probably understand how this works, but I just ripped it from https://create.t3.gg/en/usage/next-auth
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
@@ -165,10 +166,14 @@ function AddNewHabitButtonAndModal() {
       trigger={
         <button
           type="button"
-          className="fixed bottom-5 right-5 h-14 w-14 rounded-full bg-pink-600 text-3xl font-bold text-white hover:brightness-110 md:bottom-16 md:right-16 lg:shadow-md lg:shadow-pink-500 lg:transition-all lg:hover:-translate-y-1 lg:hover:shadow-lg lg:hover:shadow-pink-500"
           onClick={() => set_is_modal_open(true)}
+          className={cn(
+            "fixed bottom-5 right-5 flex h-12 w-12 items-center justify-center rounded-full bg-pink-500 p-0 shadow shadow-pink-300 hover:cursor-pointer",
+            "md:bottom-14 md:right-14 md:h-14 md:w-14",
+            "lg:shadow-md lg:shadow-pink-300 lg:transition-all lg:hover:-translate-y-0.5 lg:hover:shadow-lg lg:hover:shadow-pink-300 lg:hover:brightness-110"
+          )}
         >
-          +
+          <Fab />
         </button>
       }
       className="left-1/2 top-1/3 flex w-[30rem] -translate-x-1/2 -translate-y-1/2 flex-col border-t-8 border-t-pink-500 px-5 py-3 lg:top-1/2 lg:px-8 lg:py-6"
@@ -258,5 +263,21 @@ function ColorSelection(props: {
         );
       })}
     </>
+  );
+}
+
+function Fab() {
+  /* https://tailwindcomponents.com/component/tailwind-css-fab-buttons */
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      enableBackground="new 0 0 20 20"
+      className={cn("inline-block h-6 w-6")}
+    >
+      <path
+        fill="#FFFFFF"
+        d="M16,10c0,0.553-0.048,1-0.601,1H11v4.399C11,15.951,10.553,16,10,16c-0.553,0-1-0.049-1-0.601V11H4.601 C4.049,11,4,10.553,4,10c0-0.553,0.049-1,0.601-1H9V4.601C9,4.048,9.447,4,10,4c0.553,0,1,0.048,1,0.601V9h4.399 C15.952,9,16,9.447,16,10z"
+      />
+    </svg>
   );
 }

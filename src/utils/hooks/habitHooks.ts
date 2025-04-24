@@ -1,7 +1,7 @@
 import { api } from "../api";
 
 export function use_create_day_drop() {
-  const api_utils = api.useContext();
+  const api_utils = api.useUtils();
   return api.habit.create_day_drop.useMutation({
     onMutate: async (variables) => {
       const { habit_id, year, month, day } = variables;
@@ -57,7 +57,7 @@ export function use_create_day_drop() {
   });
 }
 export function use_delete_day_drop() {
-  const api_utils = api.useContext();
+  const api_utils = api.useUtils();
   return api.habit.delete_day_drop.useMutation({
     onMutate: async (variables) => {
       const { habit_id, year, month, day } = variables;

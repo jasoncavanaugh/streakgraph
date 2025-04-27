@@ -30,47 +30,27 @@ import {
   HabitWithDayDrops,
 } from "../utils/types";
 import { cn } from "../utils/cn";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "./ui/select";
+import { SelectContent, SelectItem } from "./ui/select";
 import * as SelectPrimitive from "@radix-ui/react-select";
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { Button } from "./ui/button";
-import {
-  Check,
-  ChevronDown,
-  ChevronsUpDown,
-  Trash2Icon,
-  TrashIcon,
-} from "lucide-react";
-import {
-  Command,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "./ui/command";
-import { Command as CommandPrimitive } from "cmdk";
+import { ChevronDown, Trash2Icon } from "lucide-react";
 import { Input } from "./ui/input";
 import { ScrollArea, ScrollBar } from "./ui/scroll-area";
 
-interface IHabitDisplayProps {
+export const HabitDisplay = (props: {
   habit: HabitWithDayDrops;
   color: ColorOption;
   parent_ref: RefObject<HTMLButtonElement>;
   is_last: boolean;
-}
-export const HabitDisplay = (props: IHabitDisplayProps) => {
+}) => {
   const create_day_drop = use_create_day_drop();
   const delete_day_drop = use_delete_day_drop();
   const is_today_marked = determine_whether_today_is_marked(
     props.habit.habit_day_drops
   );
+  console.log("is_today_marked", is_today_marked);
   const [year, set_year] = useState(new Date().getFullYear());
+  console.log("habit day drops", props.habit.habit_day_drops);
 
   return (
     <li key={props.habit.id} className="rounded-lg border bg-white p-2 md:p-4">
@@ -93,7 +73,7 @@ export const HabitDisplay = (props: IHabitDisplayProps) => {
               : create_day_drop.mutate(payload);
           }}
         >
-          {is_today_marked ? "Unmark" : "Mark"}
+          Today
         </button>
       </div>
       <div className="h-2 md:h-4" />
@@ -107,7 +87,6 @@ export const HabitDisplay = (props: IHabitDisplayProps) => {
           <p>Fri</p>
           <p>Sat</p>
         </div>
-        {/* <div className="overflow-x-auto"> */}
         <ScrollArea>
           <div className="jason mb-4 gap-[0.15rem] md:gap-[0.2rem] lg:gap-[0.3rem]">
             <HabitSquaresDisplay
@@ -120,7 +99,6 @@ export const HabitDisplay = (props: IHabitDisplayProps) => {
             <ScrollBar orientation="horizontal" />
           </div>
         </ScrollArea>
-        {/* </div> */}
       </div>
       <div className="h-2 md:h-4" />
       <div className="flex justify-between gap-3">
@@ -205,20 +183,6 @@ function YearPicker({
       </SelectPrimitive.Root>
     </div>
   );
-
-  // return (
-  //   <Select
-  //     onValueChange={(new_year_str) => {
-  //       set_year(parseInt(new_year_str));
-  //     }}
-  //     value={year.toString()}
-  //   >
-  //     <SelectTrigger className="w-[180px]">
-  //       <SelectValue placeholder="Year" defaultValue={year} />
-  //     </SelectTrigger>
-  //     <SelectContent>{year_options}</SelectContent>
-  //   </Select>
-  // );
 }
 
 function TotalDisplay({
@@ -232,9 +196,7 @@ function TotalDisplay({
   return (
     <div
       title="Total"
-      className={cn(
-        "flex min-w-[2.25rem] items-center justify-center rounded-lg border-2 border-pink-500 px-1 py-0.5 text-sm font-bold text-pink-500 md:min-w-[2.5rem] md:border-2 md:text-xl"
-      )}
+      className="flex min-w-[2.25rem] items-center justify-center rounded-lg border-2 border-pink-500 px-1 py-0.5 text-sm font-bold text-pink-500 md:min-w-[2.5rem] md:border-2 md:text-xl"
     >
       {total}
     </div>
@@ -320,13 +282,17 @@ const HabitSquaresDisplay = ({
     output.push(
       <div
         key={i}
-        className={`h-[20px] w-[20px] rounded-sm border ${COLOR_TO_CLASSNAME[color]["border"]} opacity-30 md:rounded md:border lg:h-[30px] lg:w-[30px]`}
+        className={cn(
+          "h-[20px] w-[20px] rounded-sm border",
+          COLOR_TO_CLASSNAME[color]["border"],
+          "opacity-30 lg:h-[30px] lg:w-[30px]"
+        )}
       ></div>
     );
   }
   return <>{output}</>;
 };
-interface IHabitDayDropTooltipProps {
+interface HabitDayDropTooltipProps {
   is_checked: boolean;
   on_click: () => void;
   content: string;
@@ -334,40 +300,36 @@ interface IHabitDayDropTooltipProps {
 }
 const HabitDayDropTooltip = forwardRef<
   HTMLDivElement | null,
-  IHabitDayDropTooltipProps
->(
-  (
-    { is_checked, on_click, content, color }: IHabitDayDropTooltipProps,
-    ref
-  ) => {
-    return (
-      <Tooltip.Provider delayDuration={100} skipDelayDuration={0}>
-        <Tooltip.Root>
-          <Tooltip.Trigger asChild>
-            <div
-              ref={ref}
-              className={`h-[20px] w-[20px] rounded-sm border ${
-                COLOR_TO_CLASSNAME[color]["border"]
-              } hover:cursor-pointer hover:brightness-110 md:rounded md:border lg:h-[30px] lg:w-[30px] ${
-                is_checked ? COLOR_TO_CLASSNAME[color]["bg"] : ""
-              }`}
-              onClick={on_click}
-            />
-          </Tooltip.Trigger>
-          <Tooltip.Portal>
-            <Tooltip.Content
-              //Taken from https://ui.shadcn.com/docs/primitives/tooltip
-              className="z-50 overflow-hidden rounded-md border border-slate-100 bg-white p-3 text-sm text-slate-700 shadow-md animate-in fade-in-50 data-[side=bottom]:slide-in-from-top-1 data-[side=left]:slide-in-from-right-1 data-[side=right]:slide-in-from-left-1 data-[side=top]:slide-in-from-bottom-1 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-400"
-            >
-              {content}
-              <Tooltip.Arrow className="fill-white" />
-            </Tooltip.Content>
-          </Tooltip.Portal>
-        </Tooltip.Root>
-      </Tooltip.Provider>
-    );
-  }
-);
+  HabitDayDropTooltipProps
+>(({ is_checked, on_click, content, color }: HabitDayDropTooltipProps, ref) => {
+  return (
+    <Tooltip.Provider delayDuration={100} skipDelayDuration={0}>
+      <Tooltip.Root>
+        <Tooltip.Trigger asChild>
+          <div
+            ref={ref}
+            className={cn(
+              "h-[20px] w-[20px] rounded-sm border",
+              COLOR_TO_CLASSNAME[color]["border"],
+              "hover:cursor-pointer hover:brightness-110 lg:h-[30px] lg:w-[30px]",
+              is_checked ? COLOR_TO_CLASSNAME[color]["bg"] : ""
+            )}
+            onClick={on_click}
+          />
+        </Tooltip.Trigger>
+        <Tooltip.Portal>
+          <Tooltip.Content
+            //Taken from https://ui.shadcn.com/docs/primitives/tooltip
+            className="z-50 overflow-hidden rounded-md border border-slate-100 bg-white p-3 text-sm text-slate-700 shadow-md animate-in fade-in-50 data-[side=bottom]:slide-in-from-top-1 data-[side=left]:slide-in-from-right-1 data-[side=right]:slide-in-from-left-1 data-[side=top]:slide-in-from-bottom-1 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-400"
+          >
+            {content}
+            <Tooltip.Arrow className="fill-white" />
+          </Tooltip.Content>
+        </Tooltip.Portal>
+      </Tooltip.Root>
+    </Tooltip.Provider>
+  );
+});
 
 interface IDeleteHabitProps {
   id: string;

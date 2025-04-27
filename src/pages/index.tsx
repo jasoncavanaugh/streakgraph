@@ -17,7 +17,6 @@ import { getServerAuthSession } from "../server/auth";
 import { type GetServerSideProps } from "next";
 import { cn } from "../utils/cn";
 
-//I should probably understand how this works, but I just ripped it from https://create.t3.gg/en/usage/next-auth
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const session = await getServerAuthSession(ctx);
   return {
@@ -26,6 +25,8 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 };
 const Home: NextPage = () => {
   const all_habits = api.habit.get_all.useQuery();
+  const api_utils = api.useUtils();
+  console.log("all_habits", all_habits.data);
   const ref = useRef<HTMLButtonElement>(null);
   const session = useSession();
 
@@ -55,6 +56,7 @@ const Home: NextPage = () => {
         >
           Log Out
         </button>
+        <button onClick={() => api_utils.habit.get_all.invalidate()}>Hi</button>
       </div>
       <div className="h-2 md:h-4" />
       <ul className="flex flex-col gap-4">

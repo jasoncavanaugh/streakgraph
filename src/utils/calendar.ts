@@ -21,13 +21,13 @@ export function get_number_of_days_in_year(year: number) {
 
 export function check_if_marked(
   day_out_of_year: number,
-  drops: HabitDayDrop[],
+  drops: Array<{ year: number; month: number; day: number }>,
   year: number
 ) {
   let months = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
   const is_leap_year = get_number_of_days_in_year(year) === 366;
   if (is_leap_year) {
-    months[1] += 1;
+    months[1]! += 1;
   }
   let idx = 0;
   for (; idx < months.length && day_out_of_year > months[idx]!; idx++) {
@@ -36,7 +36,10 @@ export function check_if_marked(
 
   return (
     drops.filter(
-      (drop) => drop.month === idx + 1 && drop.day === day_out_of_year && drop.year === year
+      (drop) =>
+        drop.month === idx + 1 &&
+        drop.day === day_out_of_year &&
+        drop.year === year
     ).length > 0
   );
 }
@@ -45,7 +48,7 @@ export function get_day_and_month(day_out_of_year: number, year: number) {
   let months = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
   const is_leap_year = get_number_of_days_in_year(year) === 366;
   if (is_leap_year) {
-    months[1] += 1;
+    months[1]! += 1;
   }
   let idx = 0;
   for (; idx < months.length && day_out_of_year > months[idx]!; idx++) {
@@ -56,7 +59,7 @@ export function get_day_and_month(day_out_of_year: number, year: number) {
 }
 
 export function determine_whether_today_is_marked(
-  habit_day_drops: HabitDayDrop[]
+  habit_day_drops: Array<{ year: number; month: number; day: number }>
 ) {
   const today = new Date();
   const today_day = today.getDate(); //Wtf. Why is it called this
@@ -83,7 +86,7 @@ export function get_day_out_of_year(date: Date) {
   let months = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
   const is_leap_year = get_number_of_days_in_year(year) === 366;
   if (is_leap_year) {
-    months[1] += 1;
+    months[1]! += 1;
   }
 
   let day = date.getDate();
@@ -104,4 +107,15 @@ export function get_years(habit: HabitWithDayDrops) {
     }
   }
   return Array.from(years_set).sort();
+}
+
+export function get_year_values(years: Array<{ year: number }>) {
+  const year_values: Array<number> = [];
+  for (const y of years) {
+    if (!year_values.includes(y.year)) {
+      year_values.push(y.year);
+    }
+  }
+  year_values.sort();
+  return year_values;
 }

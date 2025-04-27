@@ -56,7 +56,6 @@ const Home: NextPage = () => {
         >
           Log Out
         </button>
-        <button onClick={() => api_utils.habit.get_all.invalidate()}>Hi</button>
       </div>
       <div className="h-2 md:h-4" />
       <ul className="flex flex-col gap-4">

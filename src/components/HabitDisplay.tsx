@@ -19,6 +19,7 @@ import {
   get_day_out_of_year,
   get_first_day_of_year,
   get_number_of_days_in_year,
+  get_year_values,
 } from "../utils/calendar";
 import {
   use_create_day_drop,
@@ -48,9 +49,7 @@ export const HabitDisplay = (props: {
   const is_today_marked = determine_whether_today_is_marked(
     props.habit.habit_day_drops
   );
-  console.log("is_today_marked", is_today_marked);
   const [year, set_year] = useState(new Date().getFullYear());
-  console.log("habit day drops", props.habit.habit_day_drops);
 
   return (
     <li key={props.habit.id} className="rounded-lg border bg-white p-2 md:p-4">
@@ -106,7 +105,11 @@ export const HabitDisplay = (props: {
           <DeleteHabit id={props.habit.id} />
           <TotalDisplay habit={props.habit} year={year} />
         </div>
-        <YearPicker year={year} habit={props.habit} set_year={set_year} />
+        <YearPicker
+          year={year}
+          year_values={get_year_values(props.habit.habit_day_drops)}
+          set_year={set_year}
+        />
       </div>
     </li>
   );
@@ -114,28 +117,16 @@ export const HabitDisplay = (props: {
 
 export default HabitDisplay;
 
-function get_year_options(habit: HabitWithDayDrops) {
-  const year_options: Array<number> = [];
-  for (const day_drop of habit.habit_day_drops) {
-    if (!year_options.includes(day_drop.year)) {
-      year_options.push(day_drop.year);
-    }
-  }
-  year_options.sort();
-  return year_options;
-}
-
-function YearPicker({
+export function YearPicker({
   year,
-  habit,
+  year_values,
   set_year,
 }: {
   year: number;
-  habit: HabitWithDayDrops;
+  year_values: Array<number>;
   set_year: (new_year: number) => void;
 }) {
   const [year_value, set_year_value] = useState(year.toString());
-  const year_values = get_year_options(habit);
   let year_options = [];
   for (const y of year_values) {
     year_options.push(
@@ -203,20 +194,19 @@ function TotalDisplay({
   );
 }
 
-interface IHabitSquaresDisplay {
-  habit: HabitWithDayDrops;
-  year: number;
-  color: ColorOption;
-  is_last: boolean;
-  parent_ref: RefObject<HTMLButtonElement>;
-}
 const HabitSquaresDisplay = ({
   habit,
   year,
   color,
   is_last,
   parent_ref,
-}: IHabitSquaresDisplay) => {
+}: {
+  habit: HabitWithDayDrops;
+  year: number;
+  color: ColorOption;
+  is_last: boolean;
+  parent_ref: RefObject<HTMLButtonElement>;
+}) => {
   const create_day_drop = use_create_day_drop();
   const delete_day_drop = use_delete_day_drop();
   const ref = useRef<HTMLDivElement>(null);
@@ -298,7 +288,7 @@ interface HabitDayDropTooltipProps {
   content: string;
   color: ColorOption;
 }
-const HabitDayDropTooltip = forwardRef<
+export const HabitDayDropTooltip = forwardRef<
   HTMLDivElement | null,
   HabitDayDropTooltipProps
 >(({ is_checked, on_click, content, color }: HabitDayDropTooltipProps, ref) => {
@@ -337,7 +327,7 @@ interface IDeleteHabitProps {
 const DeleteHabit = ({ id }: IDeleteHabitProps) => {
   const [is_modal_open, set_is_modal_open] = useState(false);
 
-  const api_utils = api.useContext();
+  const api_utils = api.useUtils();
   const delete_habit = api.habit.delete.useMutation({
     onSuccess: () => {
       api_utils.habit.get_all.invalidate();

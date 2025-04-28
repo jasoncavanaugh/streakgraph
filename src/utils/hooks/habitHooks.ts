@@ -16,11 +16,12 @@ export function use_create_day_drop() {
       }
       // Optimistically update the data with our new post
       api_utils.habit.get_all.setData(undefined, (old_habit_data) => {
-        if (!old_habit_data) {
+        const old_habit_data_cloned = structuredClone(old_habit_data);
+        if (!old_habit_data_cloned) {
           console.log("'old_habit_data' is undefined");
           return [];
         }
-        const filtered = old_habit_data.filter(
+        const filtered = old_habit_data_cloned.filter(
           (habit) => habit.id === habit_id
         );
         if (filtered.length === 0) {
@@ -41,7 +42,7 @@ export function use_create_day_drop() {
           month: month,
           day: day,
         });
-        return old_habit_data;
+        return old_habit_data_cloned;
       });
 
       // Return the previous data so we can revert if something goes wrong

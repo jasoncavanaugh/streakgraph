@@ -1,22 +1,20 @@
-import type { NextPage } from "next";
-import * as RadixModal from "@radix-ui/react-dialog";
-import { RefObject, useEffect, useRef, useState } from "react";
-import { api } from "../utils/api";
+import { GetServerSideProps } from "next";
 import { Modal } from "../components/Modal";
-import { HabitDisplay } from "../components/HabitDisplay";
-import { Spinner } from "../components/Spinner";
-import { get_years } from "../utils/calendar";
+import * as RadixModal from "@radix-ui/react-dialog";
+import { getServerAuthSession } from "../server/auth";
+import { useRouter } from "next/router";
+import { signOut, useSession } from "next-auth/react";
+import { RefObject, useEffect, useRef, useState } from "react";
+import Spinner from "../components/Spinner";
+import { api } from "../utils/api";
 import {
-  ColorOption,
   COLOR_OPTIONS,
   COLOR_TO_CLASSNAME,
+  ColorOption,
   HabitWithDayDrops,
 } from "../utils/types";
-import { signIn, signOut, useSession } from "next-auth/react";
-import { getServerAuthSession } from "../server/auth";
-import { type GetServerSideProps } from "next";
+import HabitDisplay from "../components/HabitDisplay";
 import { cn } from "../utils/cn";
-import { useRouter } from "next/router";
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const session = await getServerAuthSession(ctx);
@@ -24,83 +22,81 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     props: { session },
   };
 };
-const Home: NextPage = () => {
-  // const all_habits = api.habit.get_all.useQuery();
+export default function Habits() {
   const router = useRouter();
   const session = useSession();
   const ref = useRef<HTMLButtonElement>(null);
   useEffect(() => {
-    if (session.status === "authenticated") {
-      router.push("/habits");
-    } else if (session.status === "unauthenticated") {
+    if (session.status === "unauthenticated") {
       router.push("/home");
     }
-  }, [session.status]);
+  }, []);
+  if (session.status === "loading") {
+    return (
+      <div className="flex h-[95vh] items-center justify-center p-1 md:p-4">
+        <Spinner className="h-16 w-16 border-4 border-solid border-white lg:border-8" />
+      </div>
+    );
+  }
 
-  // if (all_habits.status === "error") {
-  //   console.error(all_habits.error);
-  // }
-
-  // if (session.status === "loading") {
   return (
-    <div className="flex h-[95vh] items-center justify-center p-1 md:p-4">
-      <Spinner className="h-16 w-16 border-4 border-solid border-white lg:border-8" />
+    <div className="p-1 md:p-4">
+      <div className="flex items-end justify-between gap-2 px-1 pt-2  md:flex-row md:pt-0">
+        <div className="flex items-center gap-2">
+          <span className="text-xl font-bold">
+            <span className="text-pink-500">STREAK</span>
+            <span className="text-white">GRAPH</span>
+          </span>
+        </div>
+        <button
+          className="rounded bg-pink-500 px-3 py-1 text-sm font-semibold text-white shadow-sm shadow-pink-500 hover:brightness-110 md:px-5 md:text-lg"
+          onClick={() => void signOut()}
+          ref={ref}
+        >
+          Log Out
+        </button>
+      </div>
+      <div className="h-2 md:h-4" />
+      <HabitsList parent_ref={ref} />
+      <AddNewHabitButtonAndModal />
     </div>
   );
-  // }
+}
 
-  // if (session.status === "unauthenticated") {
-  //   return <SignInPage />;
-  // }
+function HabitsList({
+  parent_ref,
+}: {
+  parent_ref: RefObject<HTMLButtonElement>;
+}) {
+  const all_habits = api.habit.get_all.useQuery();
 
-  // return (
-  //   <div className="p-1 md:p-4">
-  //     <div className="flex items-end justify-between gap-2 px-1 pt-2  md:flex-row md:pt-0">
-  //       <div className="flex items-center gap-2">
-  //         <span className="text-xl font-bold">
-  //           <span className="text-pink-500">STREAK</span>
-  //           <span className="text-white">GRAPH</span>
-  //         </span>
-  //       </div>
-  //       <button
-  //         className="rounded bg-pink-500 px-3 py-1 text-sm font-semibold text-white shadow-sm shadow-pink-500 hover:brightness-110 md:px-5 md:text-lg"
-  //         onClick={() => void signOut()}
-  //         ref={ref}
-  //       >
-  //         Log Out
-  //       </button>
-  //     </div>
-  //     <div className="h-2 md:h-4" />
-  //     <ul className="flex flex-col gap-4">
-  //       {all_habits.status === "loading" && (
-  //         <div className="flex h-[95vh] items-center justify-center">
-  //           <Spinner className="h-16 w-16 border-4 border-solid border-white lg:border-8" />
-  //         </div>
-  //       )}
-  //       {all_habits.status === "error" && (
-  //         <div className="flex h-[95vh] items-center justify-center">
-  //           <h1 className="text-white">
-  //             Uh oh, there was a problem loading your habits.
-  //           </h1>
-  //         </div>
-  //       )}
-  //       {all_habits.status === "success" && all_habits.data.length === 0 && (
-  //         <div className="flex h-[95vh] items-center justify-center">
-  //           <h1 className="text-white">
-  //             Click the '+' button to add a new habit.
-  //           </h1>
-  //         </div>
-  //       )}
-  //       {all_habits.status === "success" &&
-  //         all_habits.data.length > 0 &&
-  //         render_habits(all_habits.data, ref)}
-  //     </ul>
-  //     <AddNewHabitButtonAndModal />
-  //   </div>
-  // );
-};
-
-export default Home;
+  return (
+    <ul className="flex flex-col gap-4">
+      {all_habits.status === "loading" && (
+        <div className="flex h-[95vh] items-center justify-center">
+          <Spinner className="h-16 w-16 border-4 border-solid border-white lg:border-8" />
+        </div>
+      )}
+      {all_habits.status === "error" && (
+        <div className="flex h-[95vh] items-center justify-center">
+          <h1 className="text-white">
+            Uh oh, there was a problem loading your habits.
+          </h1>
+        </div>
+      )}
+      {all_habits.status === "success" && all_habits.data.length === 0 && (
+        <div className="flex h-[95vh] items-center justify-center">
+          <h1 className="text-white">
+            Click the '+' button to add a new habit.
+          </h1>
+        </div>
+      )}
+      {all_habits.status === "success" &&
+        all_habits.data.length > 0 &&
+        render_habits(all_habits.data, parent_ref)}
+    </ul>
+  );
+}
 
 function render_habits(
   habits: HabitWithDayDrops[],
@@ -120,36 +116,6 @@ function render_habits(
         );
       })}
     </>
-  );
-}
-
-function SignInPage() {
-  return (
-    <div className="h-[95vh] p-1 md:p-4">
-      <div className="flex justify-end">
-        <button
-          className="rounded bg-pink-500 px-3 py-1 font-semibold text-white shadow-sm shadow-pink-500 hover:brightness-110 md:px-6 md:py-2 md:text-xl"
-          onClick={() => void signIn()}
-        >
-          Sign In
-        </button>
-      </div>
-      <div className="h-8" />
-      <div className="ml-[3rem] flex flex-col gap-3 ">
-        <h1 className="text-2xl font-extrabold tracking-wider md:text-6xl lg:text-8xl">
-          <span className="bg-gradient-to-l from-pink-400 to-pink-600 bg-clip-text text-transparent">
-            STREAK
-          </span>
-          <span className="text-white">GRAPH</span>
-        </h1>
-        <div className="ml-2 text-sm leading-relaxed text-white md:text-xl">
-          <p>
-            Track your habits with a simple grid. Inspired by the GitHub
-            contributions graph.
-          </p>
-        </div>
-      </div>
-    </div>
   );
 }
 

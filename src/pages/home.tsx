@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { z } from "zod";
 import {
-  ArrowRight,
   Calendar,
   CheckSquare,
   BarChart3,
@@ -23,29 +22,41 @@ import {
 import { HabitDayDropTooltip, YearPicker } from "../components/HabitDisplay";
 import { cn } from "../utils/cn";
 import { useEffect, useRef, useState } from "react";
-import { signIn } from "next-auth/react";
-import { ClientOnly } from "../components/ClientOnly";
+import { signIn, signOut, useSession } from "next-auth/react";
+import { GetServerSideProps } from "next";
+import { getServerAuthSession } from "../server/auth";
+import { useRouter } from "next/router";
 
-export default function LandingPage() {
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+  const session = await getServerAuthSession(ctx);
+  return {
+    props: { session },
+  };
+};
+export default function HomePage() {
+  const session = useSession();
+
   return (
     <div className="flex min-h-screen flex-col">
-      <Header />
+      <Header session_status={session.status} />
       <main>
-        <ClientOnly>
-          <DemoSection />
-        </ClientOnly>
+        <DemoSection session_status={session.status} />
         <Features />
         <HowItWorks />
         {/* <Testimonials /> */}
         {/* <Pricing /> */}
-        <ReadyToJoin />
+        <ReadyToJoin session_status={session.status} />
       </main>
       <Footer />
     </div>
   );
 }
 
-function Header() {
+function Header({
+  session_status,
+}: {
+  session_status: "authenticated" | "loading" | "unauthenticated";
+}) {
   return (
     <header className="w-full border-b border-gray-800 px-4 md:px-8">
       <div className="flex h-[5rem] items-center justify-between">
@@ -55,32 +66,41 @@ function Header() {
             <span className="text-white">GRAPH</span>
           </span>
         </div>
-        {/* <nav className="hidden gap-6 md:flex">
-          <Link
-            href="#features"
-            className="text-sm font-medium text-white underline-offset-4 hover:underline"
-          >
-            Features
-          </Link>
-          <Link
-            href="#how-it-works"
-            className="text-sm font-medium text-white underline-offset-4 hover:underline"
-          >
-            How It Works
-          </Link>
-        </nav> */}
-        <div className="flex items-center gap-4">
-          <Button
-            variant="link"
-            onClick={() => void signIn()}
-            className="text-sm font-medium text-white underline-offset-4 hover:underline"
-          >
-            Log In
-          </Button>
-          <Button className="self-start bg-pink-500 hover:bg-pink-600">
-            Sign Up
-          </Button>
-        </div>
+        {session_status === "authenticated" && (
+          <div className="flex items-center gap-4 md:flex-row">
+            <Button
+              variant="link"
+              onClick={() => void signOut()}
+              className="text-sm font-medium text-white underline-offset-4 hover:underline"
+            >
+              Log Out
+            </Button>
+            <Link
+              href="/habits"
+              className="flex items-center rounded bg-pink-500 px-2 py-2 text-sm font-medium text-white hover:bg-pink-600 md:px-3"
+            >
+              Habits
+              <ChevronRight className="h-4 w-4" />
+            </Link>
+          </div>
+        )}
+        {session_status === "unauthenticated" && (
+          <div className="flex items-center gap-4">
+            <Button
+              variant="link"
+              onClick={() => void signIn()}
+              className="text-sm font-medium text-white underline-offset-4 hover:underline"
+            >
+              Log In
+            </Button>
+            <Button
+              onClick={() => void signIn()}
+              className="self-start bg-pink-500 hover:bg-pink-600"
+            >
+              Sign Up
+            </Button>
+          </div>
+        )}
       </div>
     </header>
   );
@@ -106,8 +126,17 @@ function get_demo_data_from_lcl_storage() {
   }
   return parsed_data;
 }
-function DemoSection() {
-  const [demo_data, set_demo_data] = useState(get_demo_data_from_lcl_storage());
+
+function DemoSection({
+  session_status,
+}: {
+  session_status: "authenticated" | "loading" | "unauthenticated";
+}) {
+  const router = useRouter();
+  const [demo_data, set_demo_data] = useState<TDemoData>([]);
+  useEffect(() => {
+    set_demo_data(get_demo_data_from_lcl_storage());
+  }, []);
 
   return (
     <section className="max-w-full px-4 py-12 md:px-8 md:py-24">
@@ -125,7 +154,13 @@ function DemoSection() {
           <Button
             size="sm"
             className="self-start bg-pink-500 hover:bg-pink-600"
-            onClick={() => void signIn()}
+            onClick={() => {
+              if (session_status === "authenticated") {
+                router.push("/habits");
+              } else if (session_status === "unauthenticated") {
+                void signIn();
+              }
+            }}
           >
             Get Started <ChevronRight className="h-2 w-2" />
           </Button>
@@ -135,6 +170,7 @@ function DemoSection() {
     </section>
   );
 }
+
 function HabitDisplayDemo({
   demo_data,
   set_demo_data,
@@ -208,7 +244,6 @@ function HabitDisplayDemo({
       <div className="h-2 md:h-4" />
       <div className="flex justify-between gap-3">
         <div className="flex gap-2">
-          {/* <DeleteHabit id={props.habit.id} /> */}
           <div
             title="Total"
             className="flex min-w-[2.25rem] items-center justify-center rounded-lg border-2 border-pink-500 px-1 py-0.5 text-sm font-bold text-pink-500 md:min-w-[2.5rem] md:border-2 md:text-xl"
@@ -315,9 +350,6 @@ function Features() {
       <div className="container px-4 md:px-6">
         <div className="flex flex-col items-center justify-center space-y-4 text-center">
           <div className="space-y-2">
-            {/* <div className="inline-block rounded-lg bg-pink-100 px-3 py-1 text-sm text-pink-500">
-              Features
-            </div> */}
             <h2 className="text-3xl font-bold tracking-tighter text-white md:text-4xl/tight">
               Everything you need to build better habits
             </h2>
@@ -328,11 +360,13 @@ function Features() {
           </div>
         </div>
         <div className="mx-auto grid max-w-5xl items-center gap-6 py-12 lg:grid-cols-3 lg:gap-12">
-          <div className="flex flex-col justify-center space-y-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-pink-100 text-pink-500">
-              <CheckSquare className="h-6 w-6" />
+          <div className="flex items-center md:flex-col md:gap-3">
+            <div className="w-[10%] min-w-[4rem] md:w-full">
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-pink-100 text-pink-500">
+                <CheckSquare className="h-6 w-6" />
+              </div>
             </div>
-            <div className="space-y-2">
+            <div className="w-[90%] md:w-full">
               <h3 className="text-xl font-bold text-white">Visual Tracking</h3>
               <p className="text-gray-400">
                 Track your habits with a simple, visual grid. Each completed day
@@ -340,11 +374,13 @@ function Features() {
               </p>
             </div>
           </div>
-          <div className="flex flex-col justify-center space-y-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-pink-100 text-pink-500">
-              <Calendar className="h-6 w-6" />
+          <div className="flex items-center justify-between md:flex-col md:gap-3">
+            <div className="w-[10%] min-w-[4rem] md:w-full">
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-pink-100 text-pink-500">
+                <Calendar className="h-6 w-6" />
+              </div>
             </div>
-            <div className="space-y-2">
+            <div className="w-[90%] md:w-full">
               <h3 className="text-xl font-bold text-white">Multiple Habits</h3>
               <p className="text-gray-400">
                 Track as many habits as you want, each with its own color and
@@ -352,11 +388,13 @@ function Features() {
               </p>
             </div>
           </div>
-          <div className="flex flex-col justify-center space-y-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-pink-100 text-pink-500">
-              <BarChart3 className="h-6 w-6" />
+          <div className="flex items-center justify-between md:flex-col md:gap-3">
+            <div className="w-[10%] min-w-[4rem] md:w-full">
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-pink-100 text-pink-500">
+                <BarChart3 className="h-6 w-6" />
+              </div>
             </div>
-            <div className="space-y-2">
+            <div className="w-[90%] md:w-full">
               <h3 className="text-xl font-bold text-white">
                 Progress Insights
               </h3>
@@ -378,9 +416,6 @@ function HowItWorks() {
       <div className="container px-4 md:px-6">
         <div className="flex flex-col items-center justify-center space-y-4 text-center">
           <div className="space-y-2">
-            {/* <div className="inline-block rounded-lg bg-pink-100 px-3 py-1 text-sm text-pink-500">
-              How It Works
-            </div> */}
             <h2 className="text-3xl font-bold tracking-tighter text-white md:text-4xl/tight">
               Simple steps to build lasting habits
             </h2>
@@ -390,9 +425,11 @@ function HowItWorks() {
           </div>
         </div>
         <div className="mx-auto grid max-w-5xl items-center gap-6 py-12 lg:grid-cols-3 lg:gap-12">
-          <div className="flex flex-col justify-center space-y-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-pink-100 text-pink-500">
-              <span className="text-xl font-bold">1</span>
+          <div className="flex items-center md:flex-col md:gap-3">
+            <div className="w-[10%] min-w-[4rem] md:w-full">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-pink-100 text-pink-500">
+                <span className="text-xl font-bold">1</span>
+              </div>
             </div>
             <div className="space-y-2">
               <h3 className="text-xl font-bold text-white">Create a Habit</h3>
@@ -402,9 +439,11 @@ function HowItWorks() {
               </p>
             </div>
           </div>
-          <div className="flex flex-col justify-center space-y-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-pink-100 text-pink-500">
-              <span className="text-xl font-bold">2</span>
+          <div className="flex items-center md:flex-col md:gap-3">
+            <div className="w-[10%] min-w-[4rem] md:w-full">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-pink-100 text-pink-500">
+                <span className="text-xl font-bold">2</span>
+              </div>
             </div>
             <div className="space-y-2">
               <h3 className="text-xl font-bold text-white">Track Daily</h3>
@@ -413,9 +452,11 @@ function HowItWorks() {
               </p>
             </div>
           </div>
-          <div className="flex flex-col justify-center space-y-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-pink-100 text-pink-500">
-              <span className="text-xl font-bold">3</span>
+          <div className="flex items-center md:flex-col md:gap-3">
+            <div className="w-[10%] min-w-[4rem] md:w-full">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-pink-100 text-pink-500">
+                <span className="text-xl font-bold">3</span>
+              </div>
             </div>
             <div className="space-y-2">
               <h3 className="text-xl font-bold text-white">
@@ -579,7 +620,11 @@ function Pricing() {
                 </li>
               </ul>
             </div>
-            <Button className="mt-6" variant="outline">
+            <Button
+              onClick={() => void signIn()}
+              className="mt-6"
+              variant="outline"
+            >
               Get Started
             </Button>
           </div>
@@ -625,7 +670,12 @@ function Pricing() {
     </section>
   );
 }
-function ReadyToJoin() {
+function ReadyToJoin({
+  session_status,
+}: {
+  session_status: "authenticated" | "loading" | "unauthenticated";
+}) {
+  const router = useRouter();
   return (
     <section className="w-full bg-[#1A1E2E] py-12 md:py-24 lg:py-32">
       <div className="container px-4 md:px-6">
@@ -639,7 +689,17 @@ function ReadyToJoin() {
             </p>
           </div>
           <div className="flex flex-col gap-2 min-[400px]:flex-row">
-            <Button size="lg" className="bg-pink-500 hover:bg-pink-600">
+            <Button
+              size="lg"
+              className="bg-pink-500 hover:bg-pink-600"
+              onClick={() => {
+                if (session_status === "authenticated") {
+                  router.push("/habits");
+                } else if (session_status === "unauthenticated") {
+                  void signIn();
+                }
+              }}
+            >
               Get Started
             </Button>
           </div>
@@ -664,7 +724,7 @@ function Footer() {
             Build better habits with visual progress tracking.
           </p>
         </div>
-        <div className="grid grid-cols-2 gap-10 sm:grid-cols-4">
+        {/* <div className="grid grid-cols-2 gap-10 sm:grid-cols-4">
           <div className="space-y-3">
             <h3 className="text-sm font-medium text-white">Product</h3>
             <ul className="space-y-2">
@@ -781,7 +841,7 @@ function Footer() {
               </li>
             </ul>
           </div>
-        </div>
+        </div> */}
       </div>
       {/* <Copyright /> */}
     </footer>

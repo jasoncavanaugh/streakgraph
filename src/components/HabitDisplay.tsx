@@ -264,7 +264,7 @@ const HabitSquaresDisplay = ({
             ? delete_day_drop.mutate(payload)
             : create_day_drop.mutate(payload);
         }}
-        content={`${day_name} ${month}-${day}`}
+        tooltip_content={`${day_name} ${month}-${day}`}
       />
     );
   }
@@ -285,41 +285,74 @@ const HabitSquaresDisplay = ({
 interface HabitDayDropTooltipProps {
   is_checked: boolean;
   on_click: () => void;
-  content: string;
+  tooltip_content: string;
   color: ColorOption;
 }
+type AnimationState = "idle" | "shrinking" | "expanding";
+function get_animation_class(animation_state: AnimationState) {
+  switch (animation_state) {
+    case "expanding":
+      return "animate-expand";
+    case "shrinking":
+      return "animate-shrink";
+    default: //idle
+      return "";
+  }
+}
+
 export const HabitDayDropTooltip = forwardRef<
   HTMLDivElement | null,
   HabitDayDropTooltipProps
->(({ is_checked, on_click, content, color }: HabitDayDropTooltipProps, ref) => {
-  return (
-    <Tooltip.Provider delayDuration={100} skipDelayDuration={0}>
-      <Tooltip.Root>
-        <Tooltip.Trigger asChild>
-          <div
-            ref={ref}
-            className={cn(
-              "h-[20px] w-[20px] rounded-sm border",
-              COLOR_TO_CLASSNAME[color]["border"],
-              "hover:cursor-pointer hover:brightness-110 lg:h-[30px] lg:w-[30px]",
-              is_checked ? COLOR_TO_CLASSNAME[color]["bg"] : ""
-            )}
-            onClick={on_click}
-          />
-        </Tooltip.Trigger>
-        <Tooltip.Portal>
-          <Tooltip.Content
-            //Taken from https://ui.shadcn.com/docs/primitives/tooltip
-            className="z-50 overflow-hidden rounded-md border border-slate-100 bg-white p-3 text-sm text-slate-700 shadow-md animate-in fade-in-50 data-[side=bottom]:slide-in-from-top-1 data-[side=left]:slide-in-from-right-1 data-[side=right]:slide-in-from-left-1 data-[side=top]:slide-in-from-bottom-1 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-400"
-          >
-            {content}
-            <Tooltip.Arrow className="fill-white" />
-          </Tooltip.Content>
-        </Tooltip.Portal>
-      </Tooltip.Root>
-    </Tooltip.Provider>
-  );
-});
+>(
+  (
+    { is_checked, on_click, tooltip_content, color }: HabitDayDropTooltipProps,
+    ref
+  ) => {
+    const [animation_state, set_animation_state] =
+      useState<AnimationState>("idle");
+
+    useEffect(() => {
+      if (animation_state === "expanding") {
+        const timer = setTimeout(() => {
+          set_animation_state("idle");
+        }, 400); // Match this to the expansion animation duration
+        return () => clearTimeout(timer);
+      }
+    }, [animation_state]);
+
+    return (
+      <Tooltip.Provider delayDuration={100} skipDelayDuration={0}>
+        <Tooltip.Root>
+          <Tooltip.Trigger asChild>
+            <div
+              ref={ref}
+              className={cn(
+                "h-[20px] w-[20px] rounded-sm border",
+                COLOR_TO_CLASSNAME[color]["border"],
+                get_animation_class(animation_state),
+                "hover:cursor-pointer hover:brightness-110 lg:h-[30px] lg:w-[30px]",
+                is_checked ? COLOR_TO_CLASSNAME[color]["bg"] : ""
+              )}
+              onMouseDown={() => {
+                set_animation_state("shrinking");
+              }}
+              onMouseUp={() => {
+                set_animation_state("expanding");
+                on_click();
+              }}
+            />
+          </Tooltip.Trigger>
+          <Tooltip.Portal>
+            <Tooltip.Content className="z-50 overflow-hidden rounded-md border border-slate-100 bg-white p-3 text-sm text-slate-700 shadow-md animate-in fade-in-50 data-[side=bottom]:slide-in-from-top-1 data-[side=left]:slide-in-from-right-1 data-[side=right]:slide-in-from-left-1 data-[side=top]:slide-in-from-bottom-1 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-400">
+              {tooltip_content}
+              <Tooltip.Arrow className="fill-white" />
+            </Tooltip.Content>
+          </Tooltip.Portal>
+        </Tooltip.Root>
+      </Tooltip.Provider>
+    );
+  }
+);
 
 interface IDeleteHabitProps {
   id: string;

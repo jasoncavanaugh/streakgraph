@@ -5,14 +5,13 @@ import { api } from "../utils/api";
 import { Modal } from "../components/Modal";
 import { HabitDisplay } from "../components/HabitDisplay";
 import { Spinner } from "../components/Spinner";
-import { get_years } from "../utils/calendar";
 import {
   ColorOption,
   COLOR_OPTIONS,
   COLOR_TO_CLASSNAME,
   HabitWithDayDrops,
 } from "../utils/types";
-import { signIn, signOut, useSession } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { getServerAuthSession } from "../server/auth";
 import { type GetServerSideProps } from "next";
 import { cn } from "../utils/cn";

@@ -325,7 +325,7 @@ function HabitSquaresDisplayDemo({
           );
           set_demo_data(new_data);
         }}
-        content={`${day_name} ${month}-${day}`}
+        tooltip_content={`${day_name} ${month}-${day}`}
       />
     );
   }

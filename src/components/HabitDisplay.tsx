@@ -44,11 +44,7 @@ export const HabitDisplay = (props: {
   parent_ref: RefObject<HTMLButtonElement>;
   is_last: boolean;
 }) => {
-  const create_day_drop = use_create_day_drop();
-  const delete_day_drop = use_delete_day_drop();
-  const is_today_marked = determine_whether_today_is_marked(
-    props.habit.habit_day_drops
-  );
+  const today_ref = useRef<HTMLDivElement>(null);
   const [year, set_year] = useState(new Date().getFullYear());
 
   return (
@@ -57,23 +53,15 @@ export const HabitDisplay = (props: {
         <h1 className="flex justify-start text-xl font-semibold text-slate-700 md:text-2xl lg:text-3xl">
           {props.habit.name}
         </h1>
-        <button
-          className="rounded bg-pink-500 px-4 text-sm font-semibold text-white hover:brightness-110 md:text-base"
+        <Button
+          className="h-8 rounded bg-pink-500 px-4 text-sm font-semibold text-white hover:bg-pink-600 md:text-base"
           onClick={(e) => {
             e.preventDefault();
-            const payload = {
-              habit_id: props.habit.id,
-              year: new Date().getFullYear(),
-              month: new Date().getMonth() + 1,
-              day: new Date().getDate(),
-            };
-            is_today_marked
-              ? delete_day_drop.mutate(payload)
-              : create_day_drop.mutate(payload);
+            today_ref.current?.click();
           }}
         >
           Today
-        </button>
+        </Button>
       </div>
       <div className="h-2 md:h-4" />
       <div className="flex gap-0">
@@ -89,6 +77,7 @@ export const HabitDisplay = (props: {
         <ScrollArea>
           <div className="jason mb-4 gap-[0.15rem] md:gap-[0.2rem] lg:gap-[0.3rem]">
             <HabitSquaresDisplay
+              today_ref={today_ref}
               parent_ref={props.parent_ref}
               is_last={props.is_last}
               color={props.color}
@@ -194,24 +183,27 @@ function TotalDisplay({
   );
 }
 
-const HabitSquaresDisplay = ({
-  habit,
-  year,
-  color,
-  is_last,
-  parent_ref,
-}: {
+interface HabitSquaresDisplayProps {
   habit: HabitWithDayDrops;
   year: number;
   color: ColorOption;
   is_last: boolean;
   parent_ref: RefObject<HTMLButtonElement>;
-}) => {
+  today_ref: RefObject<HTMLDivElement>;
+}
+
+function HabitSquaresDisplay({
+  habit,
+  year,
+  color,
+  is_last,
+  parent_ref,
+  today_ref,
+}: HabitSquaresDisplayProps) {
   const create_day_drop = use_create_day_drop();
   const delete_day_drop = use_delete_day_drop();
-  const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    ref?.current?.scrollIntoView({ block: "end", inline: "nearest" });
+    today_ref?.current?.scrollIntoView({ block: "end", inline: "nearest" });
     if (is_last) {
       parent_ref.current?.scrollIntoView({ block: "end", inline: "nearest" });
     }
@@ -249,7 +241,7 @@ const HabitSquaresDisplay = ({
     const day_name = get_day_name(year, month, day);
     output.push(
       <HabitDayDropTooltip
-        ref={i === day_out_of_year_for_today ? ref : null}
+        ref={i === day_out_of_year_for_today ? today_ref : null}
         key={i}
         color={color}
         is_checked={is_checked}
@@ -281,7 +273,8 @@ const HabitSquaresDisplay = ({
     );
   }
   return <>{output}</>;
-};
+}
+
 interface HabitDayDropTooltipProps {
   is_checked: boolean;
   on_click: () => void;
@@ -311,6 +304,14 @@ export const HabitDayDropTooltip = forwardRef<
     const [animation_state, set_animation_state] =
       useState<AnimationState>("idle");
 
+    function on_mouse_down() {
+      set_animation_state("shrinking");
+    }
+    function on_mouse_up() {
+      set_animation_state("expanding");
+      on_click();
+    }
+
     useEffect(() => {
       if (animation_state === "expanding") {
         const timer = setTimeout(() => {
@@ -333,13 +334,12 @@ export const HabitDayDropTooltip = forwardRef<
                 "hover:cursor-pointer hover:brightness-110 lg:h-[30px] lg:w-[30px]",
                 is_checked ? COLOR_TO_CLASSNAME[color]["bg"] : ""
               )}
-              onMouseDown={() => {
-                set_animation_state("shrinking");
+              onClick={() => {
+                on_mouse_down();
+                on_mouse_up();
               }}
-              onMouseUp={() => {
-                set_animation_state("expanding");
-                on_click();
-              }}
+              onMouseDown={on_mouse_down}
+              onMouseUp={on_mouse_up}
             />
           </Tooltip.Trigger>
           <Tooltip.Portal>

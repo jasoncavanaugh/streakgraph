@@ -58,7 +58,7 @@ function Header({
   session_status: "authenticated" | "loading" | "unauthenticated";
 }) {
   return (
-    <header className="w-full border-b border-gray-800 px-4 md:px-8">
+    <header className="w-full border-b border-gray-800 px-2 md:px-8">
       <div className="flex h-[5rem] items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="text-xl font-bold">

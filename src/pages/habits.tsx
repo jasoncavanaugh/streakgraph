@@ -15,6 +15,7 @@ import {
 } from "../utils/types";
 import HabitDisplay from "../components/HabitDisplay";
 import { cn } from "../utils/cn";
+import { Button } from "../components/ui/button";
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const session = await getServerAuthSession(ctx);
@@ -40,22 +41,23 @@ export default function Habits() {
   }
 
   return (
-    <div className="p-1 md:p-4">
-      <div className="flex items-end justify-between gap-2 px-1 pt-2  md:flex-row md:pt-0">
+    <div className="px-2 py-2 md:px-8">
+      <header className="flex items-center justify-between gap-2 px-1 pt-2  md:flex-row md:pt-0">
         <div className="flex items-center gap-2">
           <span className="text-xl font-bold">
             <span className="text-pink-500">STREAK</span>
             <span className="text-white">GRAPH</span>
           </span>
         </div>
-        <button
-          className="rounded bg-pink-500 px-3 py-1 text-sm font-semibold text-white shadow-sm shadow-pink-500 hover:brightness-110 md:px-5 md:text-lg"
-          onClick={() => void signOut()}
+        <Button
+          className="bg-pink-500 px-2 py-2 text-sm font-medium text-white hover:bg-pink-600 md:px-3"
           ref={ref}
+          onClick={() => void signOut()}
         >
           Log Out
-        </button>
-      </div>
+        </Button>
+        {/* <button className="rounded bg-pink-500 px-3 py-1 text-sm font-semibold text-white shadow-sm shadow-pink-500 hover:brightness-110 md:px-5 md:text-lg"></button> */}
+      </header>
       <div className="h-2 md:h-4" />
       <HabitsList parent_ref={ref} />
       <AddNewHabitButtonAndModal />

@@ -57,7 +57,12 @@ export const HabitDisplay = (props: {
           className="h-8 rounded bg-pink-500 px-4 text-sm font-semibold text-white hover:bg-pink-600 md:text-base"
           onClick={(e) => {
             e.preventDefault();
-            today_ref.current?.click();
+            today_ref.current?.dispatchEvent(
+              new MouseEvent("mousedown", { bubbles: true })
+            );
+            today_ref.current?.dispatchEvent(
+              new MouseEvent("mouseup", { bubbles: true })
+            );
           }}
         >
           Today
@@ -316,7 +321,7 @@ export const HabitDayDropTooltip = forwardRef<
       if (animation_state === "expanding") {
         const timer = setTimeout(() => {
           set_animation_state("idle");
-        }, 400); // Match this to the expansion animation duration
+        }, 400); // This matches -> "expand": "expand 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards", in tailwind.config.cjs
         return () => clearTimeout(timer);
       }
     }, [animation_state]);
@@ -334,10 +339,6 @@ export const HabitDayDropTooltip = forwardRef<
                 "hover:cursor-pointer hover:brightness-110 lg:h-[30px] lg:w-[30px]",
                 is_checked ? COLOR_TO_CLASSNAME[color]["bg"] : ""
               )}
-              onClick={() => {
-                on_mouse_down();
-                on_mouse_up();
-              }}
               onMouseDown={on_mouse_down}
               onMouseUp={on_mouse_up}
             />

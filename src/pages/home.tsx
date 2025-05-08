@@ -21,7 +21,7 @@ import {
 } from "../utils/calendar";
 import { HabitDayDropTooltip, YearPicker } from "../components/HabitDisplay";
 import { cn } from "../utils/cn";
-import { useEffect, useRef, useState } from "react";
+import { RefObject, useEffect, useRef, useState } from "react";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { GetServerSideProps } from "next";
 import { getServerAuthSession } from "../server/auth";
@@ -178,6 +178,7 @@ function HabitDisplayDemo({
   demo_data: TDemoData;
   set_demo_data: (new_data: TDemoData) => void;
 }) {
+  const today_ref = useRef<HTMLDivElement>(null);
   const [year, set_year] = useState(new Date().getFullYear());
   const total = demo_data.filter((d) => d.year === year).length;
 
@@ -187,37 +188,20 @@ function HabitDisplayDemo({
         <h1 className="flex justify-start text-xl font-semibold text-slate-700 md:text-2xl lg:text-3xl">
           Reading
         </h1>
-        <button
-          className="rounded bg-pink-500 px-4 text-sm font-semibold text-white hover:bg-pink-600 md:text-base"
+        <Button
+          className="h-8 rounded bg-pink-500 px-4 text-sm font-semibold text-white hover:bg-pink-600 md:text-base"
           onClick={(e) => {
             e.preventDefault();
-            let new_data = [...demo_data];
-            const is_today_marked =
-              determine_whether_today_is_marked(demo_data);
-            const today = new Date();
-            const month = today.getMonth() + 1;
-            const year = today.getFullYear();
-            const day = today.getDate();
-            if (is_today_marked) {
-              new_data = new_data.filter((d) => {
-                return d.month !== month || d.day !== day || d.year !== year;
-              });
-            } else {
-              new_data.push({
-                month,
-                day,
-                year,
-              });
-            }
-            localStorage.setItem(
-              DEMO_DATA_LCL_STRG_KEY,
-              JSON.stringify(new_data)
+            today_ref.current?.dispatchEvent(
+              new MouseEvent("mousedown", { bubbles: true })
             );
-            set_demo_data(new_data);
+            today_ref.current?.dispatchEvent(
+              new MouseEvent("mouseup", { bubbles: true })
+            );
           }}
         >
           Today
-        </button>
+        </Button>
       </div>
       <div className="h-2 md:h-4" />
       <div className="flex gap-0">
@@ -236,6 +220,7 @@ function HabitDisplayDemo({
               habit_data={demo_data}
               set_demo_data={set_demo_data}
               year={year}
+              today_ref={today_ref}
             />
             <ScrollBar orientation="horizontal" />
           </div>
@@ -265,12 +250,13 @@ function HabitSquaresDisplayDemo({
   habit_data,
   set_demo_data,
   year,
+  today_ref,
 }: {
   habit_data: TDemoData;
   set_demo_data: (new_data: TDemoData) => void;
   year: number;
+  today_ref: RefObject<HTMLDivElement>;
 }) {
-  const ref = useRef<HTMLDivElement>(null);
   const number_of_days_in_year = get_number_of_days_in_year(year);
   const first_day_of_year = get_first_day_of_year(year);
   const day_out_of_year_for_today =
@@ -281,7 +267,7 @@ function HabitSquaresDisplayDemo({
       : number_of_days_in_year;
 
   useEffect(() => {
-    ref?.current?.scrollIntoView({ block: "end", inline: "nearest" });
+    today_ref?.current?.scrollIntoView({ block: "end", inline: "nearest" });
   }, []);
   let output = [];
   for (let i = 1; i < first_day_of_year; i++) {
@@ -302,7 +288,7 @@ function HabitSquaresDisplayDemo({
     const day_name = get_day_name(year, month, day);
     output.push(
       <HabitDayDropTooltip
-        ref={i === day_out_of_year_for_today ? ref : null}
+        ref={i === day_out_of_year_for_today ? today_ref : null}
         key={i}
         color="green-500"
         is_checked={is_checked}

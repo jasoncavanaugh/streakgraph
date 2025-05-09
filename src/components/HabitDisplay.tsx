@@ -318,7 +318,14 @@ export const HabitDayDropTooltip = forwardRef<
     }
 
     useEffect(() => {
-      if (animation_state === "expanding") {
+      if (animation_state === "shrinking") {
+        const handle_pointer_up = () => {
+          set_animation_state("expanding");
+          on_click();
+        };
+        window.addEventListener("pointerup", handle_pointer_up);
+        return () => window.removeEventListener("pointerup", handle_pointer_up);
+      } else if (animation_state === "expanding") {
         const timer = setTimeout(() => {
           set_animation_state("idle");
         }, 400); // This matches -> "expand": "expand 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards", in tailwind.config.cjs
@@ -340,8 +347,6 @@ export const HabitDayDropTooltip = forwardRef<
                 is_checked ? COLOR_TO_CLASSNAME[color]["bg"] : ""
               )}
               onMouseDown={on_mouse_down}
-              onMouseLeave={on_mouse_up}
-              onMouseUp={on_mouse_up}
             />
           </Tooltip.Trigger>
           <Tooltip.Portal>

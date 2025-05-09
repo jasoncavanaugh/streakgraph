@@ -55,14 +55,17 @@ export const HabitDisplay = (props: {
         </h1>
         <Button
           className="h-8 rounded bg-pink-500 px-4 text-sm font-semibold text-white hover:bg-pink-600 md:text-base"
-          onClick={(e) => {
+          onMouseDown={(e) => {
             e.preventDefault();
             today_ref.current?.dispatchEvent(
               new MouseEvent("mousedown", { bubbles: true })
             );
-            // today_ref.current?.dispatchEvent(
-            //   new MouseEvent("pointerup", { bubbles: true })
-            // );
+          }}
+          onMouseUp={(e) => {
+            e.preventDefault();
+            today_ref.current?.dispatchEvent(
+              new MouseEvent("mouseup", { bubbles: true })
+            );
           }}
         >
           Today
@@ -284,11 +287,12 @@ type AnimationState = "idle" | "shrinking" | "expanding";
 function get_animation_class(animation_state: AnimationState) {
   switch (animation_state) {
     case "expanding":
+    case "idle":
       return "animate-expand";
     case "shrinking":
       return "animate-shrink";
     default: //idle
-      return "";
+      throw new Error("Invalid state in 'get_animation_class'");
   }
 }
 
@@ -315,13 +319,8 @@ export function HabitDayDropTooltip({
         set_animation_state("expanding");
         on_click();
       };
-      window.addEventListener("pointerup", handle_pointer_up);
-      return () => window.removeEventListener("pointerup", handle_pointer_up);
-    } else if (animation_state === "expanding") {
-      const timer = setTimeout(() => {
-        set_animation_state("idle");
-      }, 400); // This matches -> "expand": "expand 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards", in tailwind.config.cjs
-      return () => clearTimeout(timer);
+      window.addEventListener("mouseup", handle_pointer_up);
+      return () => window.removeEventListener("mouseup", handle_pointer_up);
     }
   }, [animation_state]);
 

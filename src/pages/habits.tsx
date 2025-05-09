@@ -1,6 +1,7 @@
 import { GetServerSideProps } from "next";
 import { Modal } from "../components/Modal";
 import * as RadixModal from "@radix-ui/react-dialog";
+import * as RadixVisuallyHidden from "@radix-ui/react-visually-hidden";
 import { getServerAuthSession } from "../server/auth";
 import { useRouter } from "next/router";
 import { signOut, useSession } from "next-auth/react";
@@ -20,6 +21,19 @@ import {
 import HabitDisplay from "../components/HabitDisplay";
 import { cn } from "../utils/cn";
 import { Button } from "../components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "../components/ui/alert-dialog";
+import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const session = await getServerAuthSession(ctx);
@@ -60,7 +74,6 @@ export default function Habits() {
         >
           Log Out
         </Button>
-        {/* <button className="rounded bg-pink-500 px-3 py-1 text-sm font-semibold text-white shadow-sm shadow-pink-500 hover:brightness-110 md:px-5 md:text-lg"></button> */}
       </header>
       <div className="h-2 md:h-4" />
       <HabitsList parent_ref={ref} />
@@ -146,9 +159,8 @@ function AddNewHabitButtonAndModal() {
     create_habit.status === "loading";
 
   return (
-    <Modal
-      open={is_modal_open}
-      trigger={
+    <AlertDialog open={is_modal_open} onOpenChange={set_is_modal_open}>
+      <AlertDialogTrigger asChild>
         <button
           type="button"
           onClick={() => set_is_modal_open(true)}
@@ -160,74 +172,80 @@ function AddNewHabitButtonAndModal() {
         >
           <Fab />
         </button>
-      }
-      className="left-1/2 top-1/3 flex w-[30rem] -translate-x-1/2 -translate-y-1/2 flex-col border-t-8 border-t-pink-500 px-5 py-3 lg:top-1/2 lg:px-8 lg:py-6"
-    >
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          if (name.length === 0 || color === "") {
-            return;
-          }
-          create_habit.mutate({ name, color });
-        }}
-      >
-        <RadixModal.Title className="whitespace-nowrap text-3xl font-bold text-slate-700">
-          Create New Habit
-        </RadixModal.Title>
-        <div className="h-1 lg:h-4" />
-        <div className="flex w-full flex-col gap-4">
-          <label htmlFor="habit-name">Name</label>
-          <input
-            name="habit-name"
-            onChange={(e) => set_name(e.target.value)}
-            className="rounded border border-slate-600 px-2 py-1"
-            autoComplete="off"
-            type="text"
-          ></input>
-          <p>Color</p>
-          <div className="maureen">
-            <ColorSelection
-              selected_color={color}
-              on_select_color={set_color}
+      </AlertDialogTrigger>
+      <AlertDialogContent className="border-t-solid border-t-4 border-transparent border-t-pink-500">
+        <AlertDialogHeader>
+          <AlertDialogTitle>Create New Habit</AlertDialogTitle>
+        </AlertDialogHeader>
+        <RadixVisuallyHidden.Root>
+          <AlertDialogDescription>
+            Add a new habit to track. Give it a name and choose a color.
+          </AlertDialogDescription>
+        </RadixVisuallyHidden.Root>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (name.length === 0 || color === "") {
+              return;
+            }
+            create_habit.mutate({ name, color });
+          }}
+        >
+          <div className="grid gap-2">
+            <Label htmlFor="name">Habit Name</Label>
+            <Input
+              autoComplete="off"
+              id="name"
+              value={name}
+              onChange={(e) => set_name(e.target.value)}
+              placeholder="Name"
+              required
             />
           </div>
-        </div>
-        <div className="h-8" />
-        <div className="flex justify-center gap-5">
-          <button
-            className="rounded-full bg-slate-500 px-3 py-2 text-xs font-semibold text-white hover:brightness-110 lg:px-5 lg:py-3 lg:text-base lg:font-bold"
-            type="button"
-            onClick={() => {
-              set_is_modal_open(false);
-              set_name("");
-              set_color("");
-            }}
-          >
-            Cancel
-          </button>
-          <button
-            className={`rounded-full bg-pink-500 px-3 py-2 text-xs font-semibold text-white lg:px-5 lg:py-3 lg:text-base lg:font-bold ${
-              add_habit_disabled
-                ? "opacity-50"
-                : "hover:cursor-pointer hover:brightness-110"
-            }`}
-            type="submit"
-            disabled={add_habit_disabled}
-          >
-            {create_habit.status === "loading" && (
-              <Spinner
-                className={cn(
-                  SPINNER_SM_CLASSNAMES,
-                  "mx-[2.1rem] lg:mx-[3.1rem] lg:my-1"
-                )}
-              />
-            )}
-            {create_habit.status !== "loading" && "Create Habit"}
-          </button>
-        </div>
-      </form>
-    </Modal>
+          <div className="h-6" />
+          <div className="grid gap-2">
+            <Label>Color</Label>
+            <div className="flex flex-wrap gap-2">
+              {COLOR_OPTIONS.map((color_option) => (
+                <button
+                  key={color_option}
+                  type="button"
+                  className={cn(
+                    "h-7 w-7 rounded-full",
+                    color === color_option
+                      ? "scale-105 ring-2 ring-black ring-offset-1 dark:ring-white"
+                      : "hover:scale-105",
+                    COLOR_TO_CLASSNAME[color_option]["bg"]
+                  )}
+                  onClick={() => set_color(color_option)}
+                />
+              ))}
+            </div>
+          </div>
+          <div className="h-6" />
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              onClick={() => {
+                set_name("");
+                set_color("");
+              }}
+            >
+              Cancel
+            </AlertDialogCancel>
+            <Button
+              className="md:w-24"
+              disabled={add_habit_disabled}
+              type="submit"
+            >
+              {create_habit.status === "loading" && (
+                <Spinner className={cn(SPINNER_SM_CLASSNAMES)} />
+              )}
+              {create_habit.status !== "loading" && "Create"}
+            </Button>
+          </AlertDialogFooter>
+        </form>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }
 

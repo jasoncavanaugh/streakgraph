@@ -288,7 +288,7 @@ function HabitSquaresDisplayDemo({
     const day_name = get_day_name(year, month, day);
     output.push(
       <HabitDayDropTooltip
-        ref={i === day_out_of_year_for_today ? today_ref : null}
+        today_ref={i === day_out_of_year_for_today ? today_ref : null}
         key={i}
         color="green-500"
         is_checked={is_checked}

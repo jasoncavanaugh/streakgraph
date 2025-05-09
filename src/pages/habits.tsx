@@ -5,7 +5,11 @@ import { getServerAuthSession } from "../server/auth";
 import { useRouter } from "next/router";
 import { signOut, useSession } from "next-auth/react";
 import { RefObject, useEffect, useRef, useState } from "react";
-import Spinner from "../components/Spinner";
+import {
+  Spinner,
+  SPINNER_LG_CLASSNAMES,
+  SPINNER_SM_CLASSNAMES,
+} from "../components/Spinner";
 import { api } from "../utils/api";
 import {
   COLOR_OPTIONS,
@@ -35,7 +39,7 @@ export default function Habits() {
   if (session.status === "loading") {
     return (
       <div className="flex h-[95vh] items-center justify-center p-1 md:p-4">
-        <Spinner className="h-16 w-16 border-4 border-solid border-white lg:border-8" />
+        <Spinner className={SPINNER_LG_CLASSNAMES} />
       </div>
     );
   }
@@ -76,7 +80,7 @@ function HabitsList({
     <ul className="flex flex-col gap-4">
       {all_habits.status === "loading" && (
         <div className="flex h-[95vh] items-center justify-center">
-          <Spinner className="h-16 w-16 border-4 border-solid border-white lg:border-8" />
+          <Spinner className={SPINNER_LG_CLASSNAMES} />
         </div>
       )}
       {all_habits.status === "error" && (
@@ -212,7 +216,12 @@ function AddNewHabitButtonAndModal() {
             disabled={add_habit_disabled}
           >
             {create_habit.status === "loading" && (
-              <Spinner className="mx-[2.1rem] h-4 w-4 border-2 border-solid border-white lg:mx-[3.1rem] lg:my-1" />
+              <Spinner
+                className={cn(
+                  SPINNER_SM_CLASSNAMES,
+                  "mx-[2.1rem] lg:mx-[3.1rem] lg:my-1"
+                )}
+              />
             )}
             {create_habit.status !== "loading" && "Create Habit"}
           </button>

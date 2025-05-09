@@ -1,6 +1,6 @@
 import type { NextPage } from "next";
 import { useEffect, useRef } from "react";
-import { Spinner } from "../components/Spinner";
+import { Spinner, SPINNER_LG_CLASSNAMES } from "../components/Spinner";
 import { useSession } from "next-auth/react";
 import { getServerAuthSession } from "../server/auth";
 import { type GetServerSideProps } from "next";
@@ -26,7 +26,7 @@ const Home: NextPage = () => {
 
   return (
     <div className="flex h-[95vh] items-center justify-center p-1 md:p-4">
-      <Spinner className="h-16 w-16 border-4 border-solid border-white lg:border-8" />
+      <Spinner className={SPINNER_LG_CLASSNAMES} />
     </div>
   );
 };

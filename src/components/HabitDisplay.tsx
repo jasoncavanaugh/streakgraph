@@ -10,7 +10,7 @@ import { Modal } from "./Modal";
 import * as RadixModal from "@radix-ui/react-dialog";
 import { api } from "../utils/api";
 import * as Tooltip from "@radix-ui/react-tooltip";
-import { Spinner } from "./Spinner";
+import { Spinner, SPINNER_SM_CLASSNAMES } from "./Spinner";
 import {
   check_if_marked,
   determine_whether_today_is_marked,
@@ -60,9 +60,9 @@ export const HabitDisplay = (props: {
             today_ref.current?.dispatchEvent(
               new MouseEvent("mousedown", { bubbles: true })
             );
-            today_ref.current?.dispatchEvent(
-              new MouseEvent("mouseup", { bubbles: true })
-            );
+            // today_ref.current?.dispatchEvent(
+            //   new MouseEvent("pointerup", { bubbles: true })
+            // );
           }}
         >
           Today
@@ -246,7 +246,7 @@ function HabitSquaresDisplay({
     const day_name = get_day_name(year, month, day);
     output.push(
       <HabitDayDropTooltip
-        ref={i === day_out_of_year_for_today ? today_ref : null}
+        today_ref={i === day_out_of_year_for_today ? today_ref : null}
         key={i}
         color={color}
         is_checked={is_checked}
@@ -280,12 +280,6 @@ function HabitSquaresDisplay({
   return <>{output}</>;
 }
 
-interface HabitDayDropTooltipProps {
-  is_checked: boolean;
-  on_click: () => void;
-  tooltip_content: string;
-  color: ColorOption;
-}
 type AnimationState = "idle" | "shrinking" | "expanding";
 function get_animation_class(animation_state: AnimationState) {
   switch (animation_state) {
@@ -298,69 +292,65 @@ function get_animation_class(animation_state: AnimationState) {
   }
 }
 
-export const HabitDayDropTooltip = forwardRef<
-  HTMLDivElement | null,
-  HabitDayDropTooltipProps
->(
-  (
-    { is_checked, on_click, tooltip_content, color }: HabitDayDropTooltipProps,
-    ref
-  ) => {
-    const [animation_state, set_animation_state] =
-      useState<AnimationState>("idle");
+interface HabitDayDropTooltipProps {
+  is_checked: boolean;
+  on_click: () => void;
+  tooltip_content: string;
+  color: ColorOption;
+  today_ref: RefObject<HTMLDivElement> | null;
+}
+export function HabitDayDropTooltip({
+  is_checked,
+  on_click,
+  tooltip_content,
+  color,
+  today_ref,
+}: HabitDayDropTooltipProps) {
+  const [animation_state, set_animation_state] =
+    useState<AnimationState>("idle");
 
-    function on_mouse_down() {
-      set_animation_state("shrinking");
+  useEffect(() => {
+    if (animation_state === "shrinking") {
+      const handle_pointer_up = () => {
+        set_animation_state("expanding");
+        on_click();
+      };
+      window.addEventListener("pointerup", handle_pointer_up);
+      return () => window.removeEventListener("pointerup", handle_pointer_up);
+    } else if (animation_state === "expanding") {
+      const timer = setTimeout(() => {
+        set_animation_state("idle");
+      }, 400); // This matches -> "expand": "expand 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards", in tailwind.config.cjs
+      return () => clearTimeout(timer);
     }
-    function on_mouse_up() {
-      set_animation_state("expanding");
-      on_click();
-    }
+  }, [animation_state]);
 
-    useEffect(() => {
-      if (animation_state === "shrinking") {
-        const handle_pointer_up = () => {
-          set_animation_state("expanding");
-          on_click();
-        };
-        window.addEventListener("pointerup", handle_pointer_up);
-        return () => window.removeEventListener("pointerup", handle_pointer_up);
-      } else if (animation_state === "expanding") {
-        const timer = setTimeout(() => {
-          set_animation_state("idle");
-        }, 400); // This matches -> "expand": "expand 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards", in tailwind.config.cjs
-        return () => clearTimeout(timer);
-      }
-    }, [animation_state]);
-
-    return (
-      <Tooltip.Provider delayDuration={100} skipDelayDuration={0}>
-        <Tooltip.Root>
-          <Tooltip.Trigger asChild>
-            <div
-              ref={ref}
-              className={cn(
-                "h-[20px] w-[20px] rounded-sm border",
-                COLOR_TO_CLASSNAME[color]["border"],
-                get_animation_class(animation_state),
-                "hover:cursor-pointer hover:brightness-110 lg:h-[30px] lg:w-[30px]",
-                is_checked ? COLOR_TO_CLASSNAME[color]["bg"] : ""
-              )}
-              onMouseDown={on_mouse_down}
-            />
-          </Tooltip.Trigger>
-          <Tooltip.Portal>
-            <Tooltip.Content className="z-50 overflow-hidden rounded-md border border-slate-100 bg-white p-3 text-sm text-slate-700 shadow-md animate-in fade-in-50 data-[side=bottom]:slide-in-from-top-1 data-[side=left]:slide-in-from-right-1 data-[side=right]:slide-in-from-left-1 data-[side=top]:slide-in-from-bottom-1 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-400">
-              {tooltip_content}
-              <Tooltip.Arrow className="fill-white" />
-            </Tooltip.Content>
-          </Tooltip.Portal>
-        </Tooltip.Root>
-      </Tooltip.Provider>
-    );
-  }
-);
-
+  return (
+    <Tooltip.Provider delayDuration={100} skipDelayDuration={0}>
+      <Tooltip.Root>
+        <Tooltip.Trigger asChild>
+          <div
+            ref={today_ref}
+            className={cn(
+              "h-[20px] w-[20px] rounded-sm border",
+              COLOR_TO_CLASSNAME[color]["border"],
+              get_animation_class(animation_state),
+              "hover:cursor-pointer hover:brightness-110 lg:h-[30px] lg:w-[30px]",
+              is_checked ? COLOR_TO_CLASSNAME[color]["bg"] : ""
+            )}
+            onMouseDown={() => set_animation_state("shrinking")}
+          />
+        </Tooltip.Trigger>
+        <Tooltip.Portal>
+          <Tooltip.Content className="z-50 overflow-hidden rounded-md border border-slate-100 bg-white p-3 text-sm text-slate-700 shadow-md animate-in fade-in-50 data-[side=bottom]:slide-in-from-top-1 data-[side=left]:slide-in-from-right-1 data-[side=right]:slide-in-from-left-1 data-[side=top]:slide-in-from-bottom-1 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-400">
+            {tooltip_content}
+            <Tooltip.Arrow className="fill-white" />
+          </Tooltip.Content>
+        </Tooltip.Portal>
+      </Tooltip.Root>
+    </Tooltip.Provider>
+  );
+}
 interface IDeleteHabitProps {
   id: string;
 }
@@ -419,7 +409,9 @@ const DeleteHabit = ({ id }: IDeleteHabitProps) => {
             type="submit"
           >
             {delete_habit.status === "loading" && (
-              <Spinner className="h-4 w-4 border-2 border-solid border-white lg:mx-[1.33rem] lg:my-1" />
+              <Spinner
+                className={cn(SPINNER_SM_CLASSNAMES, "lg:mx-[1.33rem] lg:my-1")}
+              />
             )}
             {delete_habit.status !== "loading" && "Delete"}
           </button>

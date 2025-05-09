@@ -340,6 +340,7 @@ export const HabitDayDropTooltip = forwardRef<
                 is_checked ? COLOR_TO_CLASSNAME[color]["bg"] : ""
               )}
               onMouseDown={on_mouse_down}
+              onMouseLeave={on_mouse_up}
               onMouseUp={on_mouse_up}
             />
           </Tooltip.Trigger>

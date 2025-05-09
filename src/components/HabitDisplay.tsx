@@ -37,6 +37,16 @@ import { Button } from "./ui/button";
 import { ChevronDown, Trash2Icon } from "lucide-react";
 import { Input } from "./ui/input";
 import { ScrollArea, ScrollBar } from "./ui/scroll-area";
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "./ui/alert-dialog";
 
 export const HabitDisplay = (props: {
   habit: HabitWithDayDrops;
@@ -99,7 +109,7 @@ export const HabitDisplay = (props: {
       <div className="h-2 md:h-4" />
       <div className="flex justify-between gap-3">
         <div className="flex gap-2">
-          <DeleteHabit id={props.habit.id} />
+          <DeleteHabit id={props.habit.id} name={props.habit.name} />
           <TotalDisplay habit={props.habit} year={year} />
         </div>
         <YearPicker
@@ -349,12 +359,8 @@ export function HabitDayDropTooltip({
     </Tooltip.Provider>
   );
 }
-interface IDeleteHabitProps {
-  id: string;
-}
-const DeleteHabit = ({ id }: IDeleteHabitProps) => {
+function DeleteHabit({ id, name }: { id: string; name: string }) {
   const [is_modal_open, set_is_modal_open] = useState(false);
-
   const api_utils = api.useUtils();
   const delete_habit = api.habit.delete.useMutation({
     onSuccess: () => {
@@ -367,54 +373,40 @@ const DeleteHabit = ({ id }: IDeleteHabitProps) => {
   });
 
   return (
-    <Modal
-      open={is_modal_open}
-      trigger={
-        <button
+    <AlertDialog open={is_modal_open} onOpenChange={set_is_modal_open}>
+      <AlertDialogTrigger asChild>
+        <Button
           type="button"
+          variant="destructive"
           className="rounded bg-red-500 p-3 text-white hover:brightness-110"
           onClick={() => set_is_modal_open(true)}
         >
           <Trash2Icon className="h-4 w-4" />
-        </button>
-      }
-      className="left-1/2 top-1/2 flex w-[20rem] -translate-x-1/2 -translate-y-1/2 flex-col border-t-8 border-t-red-500 px-5 py-3 lg:top-1/2 lg:w-[30rem] lg:px-8 lg:py-6"
-    >
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          delete_habit.mutate({ id });
-        }}
-      >
-        <RadixModal.Title className="whitespace-nowrap text-3xl font-bold text-slate-700">
-          Delete Habit
-        </RadixModal.Title>
-        <div className="h-1 lg:h-4" />
-        <div className="flex w-full flex-col gap-4">
-          Are you sure you wish to delete this habit?
-        </div>
-        <div className="h-8" />
-        <div className="flex justify-center gap-5">
-          <button
-            className="rounded-full bg-slate-500 px-5 py-3 text-xs font-semibold text-white outline-none hover:brightness-110 lg:text-base lg:font-bold"
-            type="button"
-            onClick={() => set_is_modal_open(false)}
-          >
-            Cancel
-          </button>
-          <button
-            className="rounded-full bg-red-500 px-5 py-3 text-xs font-semibold text-white outline-none hover:brightness-110 lg:text-base lg:font-bold"
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent className="border-t-solid border-t-4 border-transparent border-t-red-500">
+        <AlertDialogHeader>
+          <AlertDialogTitle>Delete "{name}"</AlertDialogTitle>
+        </AlertDialogHeader>
+        <AlertDialogDescription>
+          Are you sure you want to delete this habit? This action cannot be
+          undone.
+        </AlertDialogDescription>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <Button
+            variant="destructive"
+            className="md:w-24"
             type="submit"
+            onClick={() => delete_habit.mutate({ id })}
           >
             {delete_habit.status === "loading" && (
-              <Spinner
-                className={cn(SPINNER_SM_CLASSNAMES, "lg:mx-[1.33rem] lg:my-1")}
-              />
+              <Spinner className={cn(SPINNER_SM_CLASSNAMES)} />
             )}
             {delete_habit.status !== "loading" && "Delete"}
-          </button>
-        </div>
-      </form>
-    </Modal>
+          </Button>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
-};
+}

@@ -11,7 +11,6 @@ import { Button } from "../components/ui/button";
 import { ScrollArea, ScrollBar } from "../components/ui/scroll-area";
 import {
   check_if_marked,
-  determine_whether_today_is_marked,
   get_day_and_month,
   get_day_name,
   get_day_out_of_year,
@@ -190,11 +189,14 @@ function HabitDisplayDemo({
         </h1>
         <Button
           className="h-8 rounded bg-pink-500 px-4 text-sm font-semibold text-white hover:bg-pink-600 md:text-base"
-          onClick={(e) => {
+          onMouseDown={(e) => {
             e.preventDefault();
             today_ref.current?.dispatchEvent(
               new MouseEvent("mousedown", { bubbles: true })
             );
+          }}
+          onMouseUp={(e) => {
+            e.preventDefault();
             today_ref.current?.dispatchEvent(
               new MouseEvent("mouseup", { bubbles: true })
             );

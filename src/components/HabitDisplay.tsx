@@ -1,19 +1,9 @@
-import {
-  useMemo,
-  useState,
-  useRef,
-  useEffect,
-  forwardRef,
-  RefObject,
-} from "react";
-import { Modal } from "./Modal";
-import * as RadixModal from "@radix-ui/react-dialog";
+import { useMemo, useState, useRef, useEffect, RefObject } from "react";
 import { api } from "../utils/api";
 import * as Tooltip from "@radix-ui/react-tooltip";
 import { Spinner, SPINNER_SM_CLASSNAMES } from "./Spinner";
 import {
   check_if_marked,
-  determine_whether_today_is_marked,
   get_day_and_month,
   get_day_name,
   get_day_out_of_year,

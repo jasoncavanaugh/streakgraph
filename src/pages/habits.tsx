@@ -1,6 +1,4 @@
 import { GetServerSideProps } from "next";
-import { Modal } from "../components/Modal";
-import * as RadixModal from "@radix-ui/react-dialog";
 import * as RadixVisuallyHidden from "@radix-ui/react-visually-hidden";
 import { getServerAuthSession } from "../server/auth";
 import { useRouter } from "next/router";
@@ -23,7 +21,6 @@ import { cn } from "../utils/cn";
 import { Button } from "../components/ui/button";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,

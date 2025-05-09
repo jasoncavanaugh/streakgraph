@@ -287,12 +287,11 @@ type AnimationState = "idle" | "shrinking" | "expanding";
 function get_animation_class(animation_state: AnimationState) {
   switch (animation_state) {
     case "expanding":
-    case "idle":
       return "animate-expand";
     case "shrinking":
       return "animate-shrink";
     default: //idle
-      throw new Error("Invalid state in 'get_animation_class'");
+      return "";
   }
 }
 

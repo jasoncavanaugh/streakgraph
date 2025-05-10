@@ -320,6 +320,7 @@ function HabitSquaresDisplayDemo({
       />
     );
   }
+  console.log("output", output.length, output);
   for (; i <= number_of_days_in_year; i++) {
     output.push(
       <div

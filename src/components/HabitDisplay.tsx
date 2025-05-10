@@ -56,8 +56,8 @@ export const HabitDisplay = (props: {
   return (
     <li key={props.habit.id} className="rounded-lg border bg-white p-2 md:p-4">
       <div className="flex justify-between">
-        <div className="flex gap-2">
-          <h1 className="flex justify-start text-xl font-semibold text-slate-700 md:text-2xl lg:text-3xl">
+        <div className="flex items-center gap-1 md:items-start">
+          <h1 className="-mt-1 flex justify-start text-lg font-semibold text-slate-700 md:mt-0 md:text-xl lg:text-2xl">
             {props.habit.name}
           </h1>
           <EditHabit
@@ -368,7 +368,14 @@ function EditHabit({
   });
 
   return (
-    <AlertDialog open={is_modal_open} onOpenChange={set_is_modal_open}>
+    <AlertDialog
+      open={is_modal_open}
+      onOpenChange={() => {
+        set_color(cur_color);
+        set_name(cur_name);
+        set_is_modal_open(!is_modal_open);
+      }}
+    >
       <AlertDialogTrigger asChild>
         <Button variant="ghost" size="icon">
           <EditIcon />
@@ -395,6 +402,7 @@ function EditHabit({
           <div className="grid gap-2">
             <Label htmlFor="name">Habit Name</Label>
             <Input
+              autoFocus
               autoComplete="off"
               id="name"
               value={name}

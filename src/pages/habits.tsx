@@ -208,6 +208,7 @@ function CreateHabit() {
           <div className="flex flex-col gap-2">
             <Label htmlFor="name">Habit Name</Label>
             <Input
+              autoFocus
               autoComplete="off"
               id="name"
               value={name}

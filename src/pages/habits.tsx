@@ -145,8 +145,8 @@ function CreateHabit() {
   const [name, set_name] = useState("");
   const [color, set_color] = useState<ColorOption | "">("");
   const [is_modal_open, set_is_modal_open] = useState(false);
-
   const api_utils = api.useUtils();
+  const habits = api.habit.get_all.useQuery();
   const create_habit = api.habit.create.useMutation({
     onSuccess: () => {
       api_utils.habit.get_all.invalidate();
@@ -155,17 +155,28 @@ function CreateHabit() {
       set_is_modal_open(false);
     },
   });
+  const name_already_exists =
+    (habits.data?.filter((h) => h.name === name).length ?? 0) > 0; //Gross
 
   const add_habit_disabled =
     name.length === 0 ||
+    name_already_exists ||
     color.length === 0 ||
     create_habit.status === "loading";
 
   return (
-    <AlertDialog open={is_modal_open} onOpenChange={set_is_modal_open}>
+    <AlertDialog
+      open={is_modal_open}
+      onOpenChange={() => {
+        set_name("");
+        set_color("");
+        set_is_modal_open(!is_modal_open);
+      }}
+    >
       <AlertDialogTrigger asChild>
         <button
           type="button"
+          disabled={habits.status === "loading" || habits.status === "error"}
           onClick={() => set_is_modal_open(true)}
           className={cn(
             "fixed bottom-5 right-5 flex h-12 w-12 items-center justify-center rounded-full bg-pink-500 p-0 shadow shadow-pink-300 hover:cursor-pointer",
@@ -194,7 +205,7 @@ function CreateHabit() {
             create_habit.mutate({ name, color });
           }}
         >
-          <div className="grid gap-2">
+          <div className="flex flex-col gap-2">
             <Label htmlFor="name">Habit Name</Label>
             <Input
               autoComplete="off"
@@ -204,6 +215,9 @@ function CreateHabit() {
               placeholder="Name"
               required
             />
+            <span className="h-1 text-xs text-red-500">
+              {name_already_exists && "Name is already in use."}
+            </span>
           </div>
           <div className="h-6" />
           <div className="grid gap-2">

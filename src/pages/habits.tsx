@@ -267,31 +267,6 @@ function CreateHabit() {
   );
 }
 
-function ColorSelection(props: {
-  on_select_color: (option: ColorOption) => void;
-  selected_color: ColorOption | "";
-}) {
-  return (
-    <>
-      {COLOR_OPTIONS.map((option) => {
-        return (
-          <div
-            key={option}
-            className={`${
-              COLOR_TO_CLASSNAME[option]["bg"]
-            } h-6 w-6 rounded-md border-2 ${
-              props.selected_color === option
-                ? "border-slate-900 brightness-110"
-                : "border-white hover:cursor-pointer hover:border-slate-900 hover:brightness-110"
-            } lg:h-8 lg:w-8`}
-            onClick={() => props.on_select_color(option)}
-          />
-        );
-      })}
-    </>
-  );
-}
-
 function Fab() {
   /* https://tailwindcomponents.com/component/tailwind-css-fab-buttons */
   return (

@@ -16,7 +16,7 @@ import {
   ColorOption,
   HabitWithDayDrops,
 } from "../utils/types";
-import HabitDisplay from "../components/HabitDisplay";
+import { HabitDisplay } from "../components/HabitDisplay";
 import { cn } from "../utils/cn";
 import { Button } from "../components/ui/button";
 import {
@@ -74,7 +74,7 @@ export default function Habits() {
       </header>
       <div className="h-2 md:h-4" />
       <HabitsList parent_ref={ref} />
-      <AddNewHabitButtonAndModal />
+      <CreateHabit />
     </div>
   );
 }
@@ -107,17 +107,23 @@ function HabitsList({
           </h1>
         </div>
       )}
-      {all_habits.status === "success" &&
-        all_habits.data.length > 0 &&
-        render_habits(all_habits.data, parent_ref)}
+      {all_habits.status === "success" && all_habits.data.length > 0 && (
+        <RenderHabits
+          habits={all_habits.data as Array<HabitWithDayDrops>}
+          parent_ref={parent_ref}
+        />
+      )}
     </ul>
   );
 }
 
-function render_habits(
-  habits: HabitWithDayDrops[],
-  parent_ref: RefObject<HTMLButtonElement>
-) {
+function RenderHabits({
+  habits,
+  parent_ref,
+}: {
+  habits: HabitWithDayDrops[];
+  parent_ref: RefObject<HTMLButtonElement>;
+}) {
   return (
     <>
       {habits.map((habit, i) => {
@@ -135,7 +141,7 @@ function render_habits(
   );
 }
 
-function AddNewHabitButtonAndModal() {
+function CreateHabit() {
   const [name, set_name] = useState("");
   const [color, set_color] = useState<ColorOption | "">("");
   const [is_modal_open, set_is_modal_open] = useState(false);

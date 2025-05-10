@@ -1,16 +1,15 @@
 import { z } from "zod";
-import { COLOR_OPTIONS, ColorOption } from "../../../utils/types";
+import {
+  COLOR_OPTIONS,
+  ColorOption,
+  HabitWithDayDrops,
+} from "../../../utils/types";
 import { createTRPCRouter, publicProcedure, protectedProcedure } from "../trpc";
 
 //API
 export const habit_router = createTRPCRouter({
   get_all: protectedProcedure.query(async ({ ctx }) => {
-    // ctx.session.user.
-    const accounts = await ctx.prisma.account.findMany({
-      where: { userId: ctx.session.user.id },
-    });
-
-    return await ctx.prisma.habit.findMany({
+    return ctx.prisma.habit.findMany({
       where: {
         user_id: ctx.session.user.id,
       },
@@ -31,7 +30,25 @@ export const habit_router = createTRPCRouter({
         },
       });
     }),
-  // { user_id: ctx.session.user.id }
+  edit: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        name: z.string(),
+        color: z.enum(COLOR_OPTIONS),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      await ctx.prisma.habit.update({
+        where: {
+          id: input.id,
+        },
+        data: {
+          name: input.name,
+          color: input.color,
+        },
+      });
+    }),
   delete: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {

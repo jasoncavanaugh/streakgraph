@@ -1,6 +1,9 @@
 import { Habit, HabitDayDrop } from "@prisma/client";
 
-export type HabitWithDayDrops = Habit & { habit_day_drops: HabitDayDrop[] };
+type HabitWithColor = Omit<Habit, "color"> & { color: ColorOption };
+export type HabitWithDayDrops = HabitWithColor & {
+  habit_day_drops: HabitDayDrop[];
+};
 
 //All of this is unfortunately necessary because of Tailwind purge.
 //See this part of this video for more information: https://www.youtube.com/watch?v=HZn2LtBT59w&t=530s

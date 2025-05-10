@@ -1,6 +1,7 @@
 import { useMemo, useState, useRef, useEffect, RefObject } from "react";
 import { api } from "../utils/api";
 import * as Tooltip from "@radix-ui/react-tooltip";
+import * as RadixVisuallyHidden from "@radix-ui/react-visually-hidden";
 import { Spinner, SPINNER_SM_CLASSNAMES } from "./Spinner";
 import {
   check_if_marked,
@@ -19,12 +20,13 @@ import {
   ColorOption,
   COLOR_TO_CLASSNAME,
   HabitWithDayDrops,
+  COLOR_OPTIONS,
 } from "../utils/types";
 import { cn } from "../utils/cn";
 import { SelectContent, SelectItem } from "./ui/select";
 import * as SelectPrimitive from "@radix-ui/react-select";
 import { Button } from "./ui/button";
-import { ChevronDown, Trash2Icon } from "lucide-react";
+import { ChevronDown, EditIcon, Trash2Icon } from "lucide-react";
 import { Input } from "./ui/input";
 import { ScrollArea, ScrollBar } from "./ui/scroll-area";
 import {
@@ -37,6 +39,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "./ui/alert-dialog";
+import { Label } from "./ui/label";
 
 export const HabitDisplay = (props: {
   habit: HabitWithDayDrops;
@@ -46,13 +49,23 @@ export const HabitDisplay = (props: {
 }) => {
   const today_ref = useRef<HTMLDivElement>(null);
   const [year, set_year] = useState(new Date().getFullYear());
+  const total = props.habit.habit_day_drops.filter(
+    (drop) => drop.year === year
+  ).length;
 
   return (
     <li key={props.habit.id} className="rounded-lg border bg-white p-2 md:p-4">
       <div className="flex justify-between">
-        <h1 className="flex justify-start text-xl font-semibold text-slate-700 md:text-2xl lg:text-3xl">
-          {props.habit.name}
-        </h1>
+        <div className="flex gap-2">
+          <h1 className="flex justify-start text-xl font-semibold text-slate-700 md:text-2xl lg:text-3xl">
+            {props.habit.name}
+          </h1>
+          <EditHabit
+            id={props.habit.id}
+            cur_name={props.habit.name}
+            cur_color={props.habit.color}
+          />
+        </div>
         <Button
           className="h-8 rounded bg-pink-500 px-4 text-sm font-semibold text-white hover:bg-pink-600 md:text-base"
           onMouseDown={(e) => {
@@ -100,7 +113,12 @@ export const HabitDisplay = (props: {
       <div className="flex justify-between gap-3">
         <div className="flex gap-2">
           <DeleteHabit id={props.habit.id} name={props.habit.name} />
-          <TotalDisplay habit={props.habit} year={year} />
+          <div
+            title="Total"
+            className="flex min-w-[2.25rem] items-center justify-center rounded-lg border-2 border-pink-500 px-1 py-0.5 text-sm font-bold text-pink-500 md:min-w-[2.5rem] md:border-2 md:text-xl"
+          >
+            {total}
+          </div>
         </div>
         <YearPicker
           year={year}
@@ -111,8 +129,6 @@ export const HabitDisplay = (props: {
     </li>
   );
 };
-
-export default HabitDisplay;
 
 export function YearPicker({
   year,
@@ -173,24 +189,6 @@ export function YearPicker({
   );
 }
 
-function TotalDisplay({
-  habit,
-  year,
-}: {
-  habit: HabitWithDayDrops;
-  year: number;
-}) {
-  let total = habit.habit_day_drops.filter((drop) => drop.year === year).length;
-  return (
-    <div
-      title="Total"
-      className="flex min-w-[2.25rem] items-center justify-center rounded-lg border-2 border-pink-500 px-1 py-0.5 text-sm font-bold text-pink-500 md:min-w-[2.5rem] md:border-2 md:text-xl"
-    >
-      {total}
-    </div>
-  );
-}
-
 interface HabitSquaresDisplayProps {
   habit: HabitWithDayDrops;
   year: number;
@@ -199,7 +197,6 @@ interface HabitSquaresDisplayProps {
   parent_ref: RefObject<HTMLButtonElement>;
   today_ref: RefObject<HTMLDivElement>;
 }
-
 function HabitSquaresDisplay({
   habit,
   year,
@@ -349,13 +346,109 @@ export function HabitDayDropTooltip({
     </Tooltip.Provider>
   );
 }
+
+function EditHabit({
+  id,
+  cur_name,
+  cur_color,
+}: {
+  id: string;
+  cur_name: string;
+  cur_color: ColorOption;
+}) {
+  const api_utils = api.useUtils();
+  const [is_modal_open, set_is_modal_open] = useState(false);
+  const [color, set_color] = useState<ColorOption>(cur_color);
+  const [name, set_name] = useState(cur_name);
+  const edit_habit = api.habit.edit.useMutation({
+    onSuccess: () => {
+      api_utils.habit.invalidate();
+      set_is_modal_open(false);
+    },
+  });
+
+  return (
+    <AlertDialog open={is_modal_open} onOpenChange={set_is_modal_open}>
+      <AlertDialogTrigger asChild>
+        <Button variant="ghost" size="icon">
+          <EditIcon />
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent className="border-t-solid border-t-4 border-transparent border-t-pink-500">
+        <AlertDialogHeader>
+          <AlertDialogTitle>Edit Habit</AlertDialogTitle>
+        </AlertDialogHeader>
+        <RadixVisuallyHidden.Root>
+          <AlertDialogDescription>
+            Edit habit "{cur_name}". Change the name or color.
+          </AlertDialogDescription>
+        </RadixVisuallyHidden.Root>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (name.length === 0) {
+              return;
+            }
+            edit_habit.mutate({ id, name, color });
+          }}
+        >
+          <div className="grid gap-2">
+            <Label htmlFor="name">Habit Name</Label>
+            <Input
+              autoComplete="off"
+              id="name"
+              value={name}
+              onChange={(e) => set_name(e.target.value)}
+              placeholder="Name"
+              required
+            />
+          </div>
+          <div className="h-6" />
+          <div className="grid gap-2">
+            <Label>Color</Label>
+            <div className="flex flex-wrap gap-2">
+              {COLOR_OPTIONS.map((color_option) => (
+                <button
+                  key={color_option}
+                  type="button"
+                  className={cn(
+                    "h-7 w-7 rounded-full",
+                    color === color_option
+                      ? "scale-105 ring-2 ring-black ring-offset-1 dark:ring-white"
+                      : "hover:scale-105",
+                    COLOR_TO_CLASSNAME[color_option]["bg"]
+                  )}
+                  onClick={() => set_color(color_option)}
+                />
+              ))}
+            </div>
+          </div>
+          <div className="h-6" />
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <Button
+              className="md:w-24"
+              disabled={name.length === 0}
+              type="submit"
+            >
+              {edit_habit.status === "loading" && (
+                <Spinner className={cn(SPINNER_SM_CLASSNAMES)} />
+              )}
+              {edit_habit.status !== "loading" && "Save"}
+            </Button>
+          </AlertDialogFooter>
+        </form>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
 function DeleteHabit({ id, name }: { id: string; name: string }) {
   const [is_modal_open, set_is_modal_open] = useState(false);
   const api_utils = api.useUtils();
   const delete_habit = api.habit.delete.useMutation({
     onSuccess: () => {
       api_utils.habit.get_all.invalidate();
-      set_is_modal_open(false); //TODO: Have to figure out how to close the modal once the new data comes in
+      set_is_modal_open(false);
     },
     onError: () => {
       alert("error");

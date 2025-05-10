@@ -288,6 +288,9 @@ function HabitSquaresDisplayDemo({
     }
     const is_checked = check_if_marked(i, habit_data, year);
     const day_name = get_day_name(year, month, day);
+    if (i === day_out_of_year_for_today) {
+      console.log("i: ", i, day_name, year, month, day);
+    }
     output.push(
       <HabitDayDropTooltip
         today_ref={i === day_out_of_year_for_today ? today_ref : null}

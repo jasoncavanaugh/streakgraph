@@ -44,7 +44,7 @@ import { Label } from "./ui/label";
 export const HabitDisplay = (props: {
   habit: HabitWithDayDrops;
   color: ColorOption;
-  parent_ref: RefObject<HTMLButtonElement>;
+  parent_ref: RefObject<HTMLButtonElement | null>;
   is_last: boolean;
 }) => {
   const today_ref = useRef<HTMLDivElement>(null);
@@ -194,8 +194,8 @@ interface HabitSquaresDisplayProps {
   year: number;
   color: ColorOption;
   is_last: boolean;
-  parent_ref: RefObject<HTMLButtonElement>;
-  today_ref: RefObject<HTMLDivElement>;
+  parent_ref: RefObject<HTMLButtonElement | null>;
+  today_ref: RefObject<HTMLDivElement | null>;
 }
 function HabitSquaresDisplay({
   habit,
@@ -297,7 +297,7 @@ interface HabitDayDropTooltipProps {
   on_click: () => void;
   tooltip_content: string;
   color: ColorOption;
-  today_ref: RefObject<HTMLDivElement> | null;
+  today_ref: RefObject<HTMLDivElement | null> | null;
 }
 export function HabitDayDropTooltip({
   is_checked,

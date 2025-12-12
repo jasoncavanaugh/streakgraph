@@ -257,7 +257,7 @@ function HabitSquaresDisplayDemo({
   habit_data: TDemoData;
   set_demo_data: (new_data: TDemoData) => void;
   year: number;
-  today_ref: RefObject<HTMLDivElement>;
+  today_ref: RefObject<HTMLDivElement | null>;
 }) {
   const number_of_days_in_year = get_number_of_days_in_year(year);
   const first_day_of_year = get_first_day_of_year(year);

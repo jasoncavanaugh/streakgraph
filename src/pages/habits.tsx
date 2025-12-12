@@ -82,7 +82,7 @@ export default function Habits() {
 function HabitsList({
   parent_ref,
 }: {
-  parent_ref: RefObject<HTMLButtonElement>;
+  parent_ref: RefObject<HTMLButtonElement | null>;
 }) {
   const all_habits = api.habit.get_all.useQuery();
 
@@ -122,7 +122,7 @@ function RenderHabits({
   parent_ref,
 }: {
   habits: HabitWithDayDrops[];
-  parent_ref: RefObject<HTMLButtonElement>;
+  parent_ref: RefObject<HTMLButtonElement | null>;
 }) {
   return (
     <>
